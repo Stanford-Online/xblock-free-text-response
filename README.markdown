@@ -4,22 +4,22 @@ Enables instructors to create questions with free-text responses.
 ## TODO List:
 - [ ] Write tests
 - [ ] Update the `student_view`
-    - [ ] `./xblockfreetext/private/view.html`
-        - Add content to `<div class="xblockfreetext_block"></div>` element
-    - [ ] `./xblockfreetext/private/view.js`
-        - Add logic to `XblockFreetextView` function
-    - [ ] `./xblockfreetext/private/view.less`
-        - Add styles to `.xblockfreetext_block { }` block
-    - [ ] `./xblockfreetext/xblockfreetext.py`
+    - [ ] `./freetextresponse/private/view.html`
+        - Add content to `<div class="freetextresponse_block"></div>` element
+    - [ ] `./freetextresponse/private/view.js`
+        - Add logic to `FreetextresponseView` function
+    - [ ] `./freetextresponse/private/view.less`
+        - Add styles to `.freetextresponse_block { }` block
+    - [ ] `./freetextresponse/freetextresponse.py`
         - Add back-end logic to `student_view` method
 - [ ] Update the `studio_view`
-    - [ ] `./xblockfreetext/private/edit.html`
+    - [ ] `./freetextresponse/private/edit.html`
         - Add `<LI>` entries to `<ul class="list-input settings-list">` for each new field
-    - [ ] `./xblockfreetext/private/edit.js`
-        - Add entry for each field to `XblockFreetextEdit`
-    - [ ] `./xblockfreetext/private/edit.less`
-        - Add styles to `.xblockfreetext_edit { }` block (if needed)
-    - [ ] `./xblockfreetext/xblockfreetext.py`
+    - [ ] `./freetextresponse/private/edit.js`
+        - Add entry for each field to `FreetextResponseEdit`
+    - [ ] `./freetextresponse/private/edit.less`
+        - Add styles to `.freetextresponse_edit { }` block (if needed)
+    - [ ] `./freetextresponse/freetextresponse.py`
         - Add entry for each field to `studio_view_save`
 - [ ] Update package metadata
     - [ ] `./package.json`

@@ -3,7 +3,7 @@ module.exports = function (grunt) {
 
     var jshintrc = '.jshintrc';
     var gruntFile = 'Gruntfile.js';
-    var directoryPackage = './xblockfreetext';
+    var directoryPackage = './freetextresponse';
     var directoryPrivate = directoryPackage + '/private';
     var directoryPublic = directoryPackage + '/public';
     var directoryPrivateJsAll = directoryPrivate + '/**/*.js';
@@ -94,8 +94,8 @@ module.exports = function (grunt) {
                     removeEmptyAttributes: true,
                 },
                 files: {
-                    'xblockfreetext/public/edit.html': directoryPrivate + '/edit.html',
-                    'xblockfreetext/public/view.html': directoryPrivate + '/view.html',
+                    'freetextresponse/public/edit.html': directoryPrivate + '/edit.html',
+                    'freetextresponse/public/view.html': directoryPrivate + '/view.html',
                 },
             },
         },
@@ -113,26 +113,26 @@ module.exports = function (grunt) {
             view: {
                 options: {
                     sourceMap: true,
-                    sourceMapFilename: 'xblockfreetext/public/view.less.min.css.map',
+                    sourceMapFilename: 'freetextresponse/public/view.less.min.css.map',
                     outputSourceFiles: true,
                     cleancss: true,
                     compress: true,
                 },
                 files: {
-                    'xblockfreetext/public/view.less.min.css':
+                    'freetextresponse/public/view.less.min.css':
                         directoryPublic + '/view.less',
                 },
             },
             edit: {
                 options: {
                     sourceMap: true,
-                    sourceMapFilename: 'xblockfreetext/public/edit.less.min.css.map',
+                    sourceMapFilename: 'freetextresponse/public/edit.less.min.css.map',
                     outputSourceFiles: true,
                     cleancss: true,
                     compress: true,
                 },
                 files: {
-                    'xblockfreetext/public/edit.less.min.css':
+                    'freetextresponse/public/edit.less.min.css':
                         directoryPublic + '/edit.less',
                 },
             },

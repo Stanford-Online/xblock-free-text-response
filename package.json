@@ -1,19 +1,19 @@
 {
   "name": "xblock-freetext",
-  "title": "FreeText XBlock",
+  "title": "FreeTextResponse XBlock",
   "description": "Enables instructors to create questions with free-text responses.",
   "version": "0.1.0",
-  "homepage": "https://github.com/Stanford-Online/xblock-freetext",
+  "homepage": "https://github.com/Stanford-Online/xblock-free-text-response",
   "author": {
     "name": "Azim Pradhan",
     "email": "azim.pradhan@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Stanford-Online/xblock-freetext.git"
+    "url": "https://github.com/Stanford-Online/xblock-free-text-response.git"
   },
   "bugs": {
-    "url": "https://github.com/Stanford-Online/xblock-freetext/issues"
+    "url": "https://github.com/Stanford-Online/xblock-free-text-response/issues"
   },
   "scripts": {
     "test": "grunt --verbose"
