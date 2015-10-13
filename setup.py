@@ -15,21 +15,21 @@ setuptools.setup(
     url=package_json.get('homepage'),
     license='AGPL-3.0',
     packages=[
-        'xblockfreetext',
+        'freetextresponse',
     ],
     install_requires=[
         'XBlock',
     ],
     entry_points={
         'xblock.v1': [
-            'xblockfreetext = xblockfreetext:XblockFreetext',
+            'freetextresponse = freetextresponse:FreeTextResponse',
         ],
     },
     package_dir={
-        'xblockfreetext': 'xblockfreetext',
+        'freetextresponse': 'freetextresponse',
     },
     package_data={
-        "xblockfreetext": [
+        "freetextresponse": [
             'public/*',
         ],
     },
