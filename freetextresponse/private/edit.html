@@ -1,6 +1,5 @@
 <div class="wrapper-comp-settings is-active editor-with-buttons xblockfreetext_edit" id="settings-tab">
   <ul class="list-input settings-list">
-    <!-- TODO: Add an entry here for each field -->
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
         <label class="label setting-label" for="freetextresponse_display_name">
@@ -15,7 +14,7 @@
         />
       </div>
       <span class="tip setting-help">
-        This name appears in the horizontal navigation at the top of the page.
+        {self.display_name_help}
       </span>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -32,7 +31,7 @@
         />
       </div>
       <span class="tip setting-help">
-        This is the prompt students will see when asked to enter their response.
+        {self.prompt_help}
       </span>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -51,7 +50,7 @@
         />
       </div>
       <span class="tip setting-help">
-        This assigns an integer value representing the weight of this problem
+        {self.weight_help}
       </span>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -70,7 +69,7 @@
         />
       </div>
       <span class="tip setting-help">
-        This is the maximum number of times a student is allowed to attempt the problem
+        {self.max_attempts_help}
       </span>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -86,6 +85,9 @@
             tabindex="1"
         />
       </div>
+      <span class="tip setting-help">
+        {self.display_correctness_help}
+      </span>
     </li>
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
@@ -103,7 +105,7 @@
         />
       </div>
       <span class="tip setting-help">
-        This is the minimum number of words required for this question.
+        {self.min_word_count_help}
       </span>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -122,7 +124,7 @@
         />
       </div>
       <span class="tip setting-help">
-        This is the maximum number of words allowed for this question.
+        {self.max_word_count_help}
       </span>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -133,13 +135,13 @@
         <input
           class="input setting-input"
           id="freetextresponse_fullcredit_keyphrases"
-          value="{self.fullcredit_keyphrases}"
+          value="{fullcredit_keyphrases}"
           type="text"
           tabindex="1"
         />
       </div>
       <span class="tip setting-help">
-        This is a comma separated list of keyphrases, that if present in the student's response, will assign the student full credit.
+        {self.fullcredit_keyphrases_help}
       </span>
     </li>
         <li class="field comp-setting-entry is-set">
@@ -150,14 +152,13 @@
         <input
           class="input setting-input"
           id="freetextresponse_halfcredit_keyphrases"
-          value="{self.halfcredit_keyphrases}"
+          value="{halfcredit_keyphrases}"
           type="text"
           tabindex="1"
         />
       </div>
       <span class="tip setting-help">
-        This is a comma separated list of keyphrases, that if present in the student's response, will assign the student half credit, assuming the response
-        does not already contain a fullcredit keyphrase.
+        {self.halfcredit_keyphrases_help}
       </span>
     </li>
   </ul>

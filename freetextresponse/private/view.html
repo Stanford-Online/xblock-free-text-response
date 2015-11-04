@@ -1,11 +1,13 @@
-<div class="freetextresponse_block">
+<div class="freetextresponse">
     <h2 class="problem-header">{self.display_name}</h2>
     <div class="problem-progress">({problem_progress})</div>
     <h3>{self.prompt}</h3>
-    <div class="{indicator_class}">
-        <textarea class="student_answer" style="height:150px" rows="20" cols="70">{self.student_answer}</textarea>
-        <span class="status {indicator_visibility_class}" aria-describedby="student_answer"></span>
-    </div>
+    <span class="user_input">
+        <div class="{indicator_class}">
+            <textarea class="student_answer" style="height:150px" rows="20" cols="70">{self.student_answer}</textarea>
+            <span class="status {indicator_visibility_class}" aria-describedby="student_answer"></span>
+        </div>
+    </span>
     <div class="word-count-error">
         {word_count_message}
     </div>

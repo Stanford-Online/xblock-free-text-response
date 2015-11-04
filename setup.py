@@ -22,7 +22,7 @@ setuptools.setup(
     ],
     entry_points={
         'xblock.v1': [
-            'freetextresponse = freetextresponse:Freetextresponse',
+            'freetextresponse = freetextresponse:FreeTextResponse',
         ],
     },
     package_dir={

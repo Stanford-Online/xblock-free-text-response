@@ -1,4 +1,4 @@
-function FreetextresponseView(runtime, element) {
+function FreeTextResponseView(runtime, element) {
     'use strict';
 
     var $ = window.jQuery;
@@ -12,19 +12,17 @@ function FreetextresponseView(runtime, element) {
     var url = runtime.handlerUrl(element, 'submit');
 
     buttonSubmit.on('click', function () {
-        console.log('submit button was pressed!');
         buttonSubmit.text('Checking...');
         runtime.notify('submit', {
             message: 'Submitting...',
-            state: 'start',
+            state: 'start'
         });
         $.ajax(url, {
             type: 'POST',
             data: JSON.stringify({
-                'student_answer': $element.find('.student_answer').val(),
+                'student_answer': $element.find('.student_answer').val()
             }),
             success: function buttonSubmitOnSuccess(response) {
-                console.log("The response is ", response);
                 textareaParent.removeClass();
                 textareaParent.addClass(response.indicator_class);
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
@@ -35,7 +33,7 @@ function FreetextresponseView(runtime, element) {
                 buttonSubmit.text('Submit');
 
                 runtime.notify('submit', {
-                    state: 'end',
+                    state: 'end'
                 });
             },
             error: function buttonSubmitOnError() {
