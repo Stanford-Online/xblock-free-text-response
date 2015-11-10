@@ -3,23 +3,24 @@ This is the core logic for the FreeText XBlock
 """
 
 import os
-import re
 
 import pkg_resources
-
-from enum import Enum
-from xblock.core import XBlock
-from xblock.fields import Scope
-from xblock.fields import String
-from xblock.fields import Integer
-from xblock.fields import Float
-from xblock.fields import List
-from xblock.fragment import Fragment
 from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
+from enum import Enum
+from xblock.core import XBlock
+from xblock.fields import Boolean
+from xblock.fields import Float
+from xblock.fields import Integer
+from xblock.fields import List
+from xblock.fields import Scope
+from xblock.fields import String
+from xblock.fragment import Fragment
+from xblock.validation import ValidationMessage
+from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 
-class FreeTextResponse(XBlock):
+class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
     """
     Enables instructors to create questions with free-text responses.
@@ -39,103 +40,120 @@ class FreeTextResponse(XBlock):
         ]
         return scenarios
 
+    display_correctness = Boolean(
+        display_name=_('Display Correctness?'),
+        help=_(
+            'This is a flag that indicates if the indicator '
+            'icon should be displayed after a student enters '
+            'their response'
+        ),
+        default=True,
+        scope=Scope.settings,
+    )
     display_name = String(
+        display_name=_('Display Name'),
+        help=_(
+            'This is the title for this question type'
+        ),
         default=_('Free-text Response'),
         scope=Scope.settings,
     )
-    display_name_help = _('This is the title for this question type')
-
+    fullcredit_keyphrases = List(
+        display_name=_('Full-Credit Key Phrases'),
+        help=_(
+            'This is a list of words or phrases, one of '
+            'which must be present in order for the student\'s answer '
+            'to receive full credit'
+        ),
+        default=[],
+        scope=Scope.settings,
+    )
+    halfcredit_keyphrases = List(
+        display_name=_('Half-Credit Key Phrases'),
+        help=_(
+            'This is a list of words or phrases, one of '
+            'which must be present in order for the student\'s answer '
+            'to receive half credit'
+        ),
+        default=[],
+        scope=Scope.settings,
+    )
+    max_attempts = Integer(
+        display_name=_('Maximum Number of Attempts'),
+        help=_(
+            'This is the maximum number of times a '
+            'student is allowed to attempt the problem'
+        ),
+        default=0,
+        values={'min': 1},
+        scope=Scope.settings,
+    )
+    max_word_count = Integer(
+        display_name=_('Maximum Word Count'),
+        help=_(
+            'This is the maximum number of words allowed for this '
+            'question'
+        ),
+        default=10000,
+        values={'min': 1},
+        scope=Scope.settings,
+    )
+    min_word_count = Integer(
+        display_name=_('Minimum Word Count'),
+        help=_(
+            'This is the minimum number of words required '
+            'for this question'
+        ),
+        default=0,
+        values={'min': 1},
+        scope=Scope.settings,
+    )
     prompt = String(
+        display_name=_('Prompt'),
+        help=_(
+            'This is the prompt students will see when '
+            'asked to enter their response'
+        ),
         default=_('Please enter your response within this text area'),
         scope=Scope.settings,
     )
-    prompt_help = _(
-        'This is the prompt students will see when '
-        'asked to enter their response'
-    )
-
     weight = Integer(
+        display_name=_('Weight'),
+        help=_(
+            'This assigns an integer value representing '
+            'the weight of this problem'
+        ),
         default=1,
+        values={'min': 1},
         scope=Scope.settings,
-    )
-    weight_help = _(
-        'This assigns an integer value representing '
-        'the weight of this problem'
-    )
-
-    score = Float(
-        default=0.0,
-        scope=Scope.user_state,
-    )
-
-    max_attempts = Integer(
-        default=0,
-        scope=Scope.settings,
-    )
-    max_attempts_help = _(
-        'This is the maximum number of times a student '
-        'is allowed to attempt the problem'
-    )
-
-    display_correctness = String(
-        default='True',
-        scope=Scope.settings,
-    )
-    display_correctness_help = _(
-        'This is a flag that indicates if the indicator '
-        'icon should be displayed after a student enters '
-        'their response'
-    )
-
-    min_word_count = Integer(
-        default=0,
-        scope=Scope.settings,
-    )
-    min_word_count_help = _(
-        'This is the minimum number of words required for this '
-        'question'
-    )
-
-    max_word_count = Integer(
-        default=10000,
-        scope=Scope.settings,
-    )
-    max_word_count_help = _(
-        'This is the maximum number of words allowed for this '
-        'question'
-    )
-
-    fullcredit_keyphrases = List(
-        default=[],
-        scope=Scope.settings,
-    )
-    fullcredit_keyphrases_help = _(
-        'This is a list of words or phrases, one of '
-        'which must be present in order for the student\'s answer '
-        'to receive full credit'
-    )
-
-    halfcredit_keyphrases = List(
-        default=[],
-        scope=Scope.settings,
-    )
-    halfcredit_keyphrases_help = _(
-        'This is a comma-separated list of words or phrases, one of '
-        'which must be present in order for the student\'s answer '
-        'to receive half credit'
-    )
-
-    student_answer = String(
-        default='',
-        scope=Scope.user_state,
     )
 
     count_attempts = Integer(
         default=0,
         scope=Scope.user_state,
     )
+    score = Float(
+        default=0.0,
+        scope=Scope.user_state,
+    )
+    student_answer = String(
+        default='',
+        scope=Scope.user_state,
+    )
 
     has_score = True
+
+    editable_fields = (
+        'display_name',
+        'prompt',
+        'weight',
+        'max_attempts',
+        'display_correctness',
+        'min_word_count',
+        'max_word_count',
+        'fullcredit_keyphrases',
+        'halfcredit_keyphrases',
+    )
 
     def student_view(self, context=None):
         # pylint: disable=unused-argument
@@ -165,141 +183,46 @@ class FreeTextResponse(XBlock):
         return fragment
 
     @classmethod
-    def _to_comma_separated_string(cls, items):
+    def _generate_validation_message(cls, msg):
         """
-        Returns a comma-separated string from the supplied list
+        Helper method to generate a ValidationMessage from
+        the supplied string
         """
-        result = ', '.join(items)
+        result = ValidationMessage(
+            ValidationMessage.ERROR,
+            unicode(msg)
+        )
         return result
 
-    @classmethod
-    def _to_list(cls, comma_separated_string):
+    def validate_field_data(self, validation, data):
         """
-        Returns a list form the supplied comma-separated string
+        Validates settings entered by the instructor.
         """
-        result = [
-            phrase.strip()
-            for phrase in comma_separated_string.split(',')
-        ]
-        return result
-
-    def studio_view(self, context=None):
-        # pylint: disable=unused-argument
-        """
-        Build the fragment for the edit/studio view
-        Implementation is optional.
-        """
-        edit_html = FreeTextResponse.get_resource_string('edit.html')
-        edit_html = edit_html.format(
-            self=self,
-            fullcredit_keyphrases=FreeTextResponse._to_comma_separated_string(
-                self.fullcredit_keyphrases
-            ),
-            halfcredit_keyphrases=FreeTextResponse._to_comma_separated_string(
-                self.halfcredit_keyphrases
-            ),
-        )
-        fragment = self.build_fragment(
-            html_source=edit_html,
-            paths_css=[
-                'edit.less.min.css',
-            ],
-            paths_js=[
-                'edit.js.min.js',
-            ],
-            fragment_js='FreeTextResponseEdit',
-        )
-        return fragment
-
-    @XBlock.json_handler
-    def studio_view_save(self, data, suffix=''):
-        #  pylint: disable=unused-argument
-        """
-        Save XBlock fields
-        Returns: the new field values
-        """
-        return self._save_studio_data(data)
-
-    @classmethod
-    def _extract_whole_number(cls, data, key):
-        """
-        Attempts to parse a whole number for the value
-        for a given key in a dictionary
-        """
-        result = None
-        if key in data:
-            try:
-                result = int(float(data[key]))
-            except ValueError:
-                pass
-            else:
-                if result < 0:
-                    result = None
-        return result
-
-    def _save_studio_data(self, data):
-        """
-        Helper method to save the parameters set by the instructor
-        for the given instance of the FreeTextResponse XBlock
-        """
-        if 'display_name' in data:
-            self.display_name = data['display_name']
-
-        if 'prompt' in data:
-            self.prompt = data['prompt']
-
-        weight = FreeTextResponse._extract_whole_number(data, 'weight')
-        if weight is not None:
-            self.weight = weight
-
-        max_attempts = FreeTextResponse._extract_whole_number(
-            data,
-            'max_attempts'
-        )
-        if max_attempts is not None:
-            self.max_attempts = max_attempts
-
-        min_word_count = FreeTextResponse._extract_whole_number(
-            data,
-            'min_word_count'
-        )
-        max_word_count = FreeTextResponse._extract_whole_number(
-            data,
-            'max_word_count'
-        )
-
-        if min_word_count is not None and max_word_count is not None:
-            if min_word_count <= max_word_count:
-                self.min_word_count = min_word_count
-                self.max_word_count = max_word_count
-
-        if 'fullcredit_keyphrases' in data:
-            self.fullcredit_keyphrases = FreeTextResponse._to_list(
-                data['fullcredit_keyphrases']
+        if data.weight < 0:
+            msg = FreeTextResponse._generate_validation_message(
+                'Weight Attempts cannot be negative'
             )
-        if 'halfcredit_keyphrases' in data:
-            self.halfcredit_keyphrases = FreeTextResponse._to_list(
-                data['halfcredit_keyphrases']
+            validation.add(msg)
+        if data.max_attempts < 0:
+            msg = FreeTextResponse._generate_validation_message(
+                'Maximum Attempts cannot be negative'
             )
-
-        result = {
-            'display_name': self.display_name,
-            'prompt': self.prompt,
-            'weight': self.weight,
-            'max_attempts': self.max_attempts,
-            'display_correctness': self.display_correctness,
-            'min_word_count': self.min_word_count,
-            'max_word_count': self.max_word_count,
-            'fullcredit_keyphrases':
-                FreeTextResponse._to_comma_separated_string(
-                    self.fullcredit_keyphrases
-                ),
-            'halfcredit_keyphrases':
-                FreeTextResponse._to_comma_separated_string(
-                    self.halfcredit_keyphrases
-                ),
-        }
-        return result
+            validation.add(msg)
+        if data.max_word_count < 0:
+            msg = FreeTextResponse._generate_validation_message(
+                'Maximum Word Count cannot be negative'
+            )
+            validation.add(msg)
+        if data.min_word_count < 0:
+            msg = FreeTextResponse._generate_validation_message(
+                'Minimum Word Count cannot be negative'
+            )
+            validation.add(msg)
+        if data.min_word_count > data.max_word_count:
+            msg = FreeTextResponse._generate_validation_message(
+                'Minimum Word Count cannot be greater than Max Word Count'
+            )
+            validation.add(msg)
 
     @classmethod
     def get_resource_string(cls, path):
@@ -350,8 +273,9 @@ class FreeTextResponse(XBlock):
         """
         Returns the visibility class for the correctness indicator html element
         """
-        result = ''
-        if re.search('false', self.display_correctness, re.IGNORECASE):
+        if self.display_correctness:
+            result = ''
+        else:
             result = 'hidden'
         return result
 

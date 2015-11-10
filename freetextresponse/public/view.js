@@ -5,11 +5,12 @@ function FreeTextResponseView(runtime, element) {
     var $element = $(element);
     var buttonSubmit = $element.find('.check.Submit');
     var textareaParent = $element.find('.student_answer').parent();
-    var usedAttemptsFeedback = $element.find('.action .used_attempts_feedback');
+    var usedAttemptsFeedback = $element.find('.action .used-attempts-feedback');
     var problemProgress = $element.find('.problem-progress');
     var submitParent = $element.find('.Submit').parent();
     var wordCountError = $element.find('.word-count-error');
     var url = runtime.handlerUrl(element, 'submit');
+    var userInputClass = 'user-input';
 
     buttonSubmit.on('click', function () {
         buttonSubmit.text('Checking...');
@@ -24,6 +25,7 @@ function FreeTextResponseView(runtime, element) {
             }),
             success: function buttonSubmitOnSuccess(response) {
                 textareaParent.removeClass();
+                textareaParent.addClass(userInputClass);
                 textareaParent.addClass(response.indicator_class);
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
                 submitParent.removeClass();

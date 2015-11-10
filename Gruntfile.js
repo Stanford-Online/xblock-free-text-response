@@ -27,23 +27,11 @@ module.exports = function (grunt) {
                 ],
                 dest: directoryPublic + '/view.js',
             },
-            jsEdit: {
-                src: [
-                    directoryPrivate + '/edit.js',
-                ],
-                dest: directoryPublic + '/edit.js',
-            },
             cssView: {
                 src: [
                     directoryPrivate + '/view.less',
                 ],
                 dest: directoryPublic + '/view.less',
-            },
-            cssEdit: {
-                src: [
-                    directoryPrivate + '/edit.less',
-                ],
-                dest: directoryPublic + '/edit.less',
             },
         },
         copy: {
@@ -94,7 +82,6 @@ module.exports = function (grunt) {
                     removeEmptyAttributes: true,
                 },
                 files: {
-                    'freetextresponse/public/edit.html': directoryPrivate + '/edit.html',
                     'freetextresponse/public/view.html': directoryPrivate + '/view.html',
                 },
             },
@@ -121,19 +108,6 @@ module.exports = function (grunt) {
                 files: {
                     'freetextresponse/public/view.less.min.css':
                         directoryPublic + '/view.less',
-                },
-            },
-            edit: {
-                options: {
-                    sourceMap: true,
-                    sourceMapFilename: 'freetextresponse/public/edit.less.min.css.map',
-                    outputSourceFiles: true,
-                    cleancss: true,
-                    compress: true,
-                },
-                files: {
-                    'freetextresponse/public/edit.less.min.css':
-                        directoryPublic + '/edit.less',
                 },
             },
         },

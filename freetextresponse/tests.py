@@ -4,13 +4,14 @@ Module Placeholder Docstring
 import unittest
 
 import mock
-from mock import MagicMock
 from django.test.client import Client
+from django.utils.translation import ugettext as _
+from mock import MagicMock
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xblock.field_data import DictFieldData
-from .freetextresponse import FreeTextResponse
+
 from .freetextresponse import Credit
-from django.utils.translation import ugettext as _
+from .freetextresponse import FreeTextResponse
 
 
 class FreetextResponseXblockTestCase(unittest.TestCase):
@@ -49,6 +50,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.test_count_attempts = '3'
 
     def test_student_view(self):
+        # pylint: disable=protected-access
         """
         Checks the student view for student specific instance variables.
         """
@@ -66,17 +68,17 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertIn(self.xblock.display_name, studio_view_html)
         self.assertIn(self.xblock.prompt, studio_view_html)
         self.assertIn(str(self.xblock.max_attempts), studio_view_html)
-        self.assertIn(self.xblock.display_correctness, studio_view_html)
+        self.assertIn(str(self.xblock.display_correctness), studio_view_html)
         self.assertIn(str(self.xblock.min_word_count), studio_view_html)
         self.assertIn(str(self.xblock.max_word_count), studio_view_html)
         self.assertIn(
-            FreeTextResponse._to_comma_separated_string(
+            ', '.join(
                 self.xblock.fullcredit_keyphrases
             ),
             studio_view_html
         )
         self.assertIn(
-            FreeTextResponse._to_comma_separated_string(
+            ', '.join(
                 self.xblock.halfcredit_keyphrases
             ),
             studio_view_html
@@ -93,7 +95,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
         self.assertEquals(0.0, self.xblock.score)
         self.assertEquals(0, self.xblock.max_attempts)
-        self.assertEquals('True', self.xblock.display_correctness)
+        self.assertTrue(self.xblock.display_correctness)
         self.assertEquals(0, self.xblock.min_word_count)
         self.assertEquals(10000, self.xblock.max_word_count)
         self.assertEquals(
@@ -117,53 +119,10 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         """
         Helper method that returns the html of studio_view
         """
-        return self.xblock.studio_view().content
-
-    def test_studio_view_save(self):
-        """
-        Tests that the XBlock properly saves data  that is changed by the
-        instructor
-        """
-        data = {}
-        data['display_name'] = self.test_display_name
-        data['prompt'] = self.test_prompt
-        data['weight'] = self.test_weight
-        data['max_attempts'] = self.test_max_attempts
-        data['display_correctness'] = self.test_display_correctness
-        data['min_word_count'] = self.test_min_word_count
-        data['max_word_count'] = self.test_max_word_count
-        data['fullcredit_keyphrases'] = self.test_fullcredit_keyphrases
-        data['halfcredit_keyphrases'] = self.test_halfcredit_keyphrases
-
-        response = self.xblock._save_studio_data(data)
-
-        self.assertEquals(self.test_display_name, response.get('display_name'))
-        self.assertEquals(self.test_prompt, response.get('prompt'))
-        self.assertEquals(self.test_weight, response.get('weight'))
-        self.assertEquals(self.test_max_attempts, response.get('max_attempts'))
-        self.assertEquals(
-            self.test_display_correctness,
-            response.get('display_correctness')
-        )
-        self.assertEquals(
-            self.test_min_word_count,
-            response.get('min_word_count')
-        )
-        self.assertEquals(
-            self.test_max_word_count,
-            response.get('max_word_count')
-        )
-        self.assertEquals(
-            self.test_fullcredit_keyphrases,
-            response.get('fullcredit_keyphrases')
-        )
-        self.assertEquals(
-            self.test_halfcredit_keyphrases,
-            response.get('halfcredit_keyphrases')
-        )
+        return self.xblock.studio_view(context=None).content
 
     def test_word_count_message_blank_when_attempts_0(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the word count message is blank when the
         user has made zero attempts
@@ -172,7 +131,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('', self.xblock._get_word_count_message())
 
     def test_word_count_message_blank_when_word_count_valid(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the word count message doesn't display when
         the word count is valid
@@ -182,6 +141,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('', self.xblock._get_word_count_message())
 
     def test_invalid_word_count_message(self):
+        # pylint: disable=protected-access
         """
         Tests that the invalid word count message displays
         when appropriate
@@ -194,6 +154,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_indicator_class_unanswered(self):
+        # pylint: disable=protected-access
         """
         Tests that the 'unanswered' class for the display_correctness
         html component displays when appropriate
@@ -203,7 +164,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('unanswered', self.xblock._get_indicator_class())
 
     def test_indicator_class_incorrect_blank_response(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the 'incorrect' class for the display_correctness html
         component displays when the response is blank
@@ -213,7 +174,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('incorrect', self.xblock._get_indicator_class())
 
     def test_indicator_class_incorrect_normal_response(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the 'incorrect' class for the display_correctness
         html component displays when the response is incorrect
@@ -228,7 +189,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         FreeTextResponse._is_at_least_one_phrase_present = original
 
     def test_indicator_class_correct_normal_response(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the 'correct' class for the display_correctness html
         component displays when the response is correct
@@ -243,6 +204,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         FreeTextResponse._is_at_least_one_phrase_present = original
 
     def test_word_count_in_range(self):
+        # pylint: disable=protected-access
         """
         Tests that the word_count_valid method returns the
         appropriate response when the word count is valid
@@ -253,6 +215,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertTrue(self.xblock._word_count_valid())
 
     def test_word_count_min(self):
+        # pylint: disable=protected-access
         """
         Tests that the word_count_valid method returns the
         appropriate response when the student's answer has
@@ -264,6 +227,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertTrue(self.xblock._word_count_valid())
 
     def test_word_count_max(self):
+        # pylint: disable=protected-access
         """
         Tests that the word_count_valid method returns the
         appropriate response when the student's answer has
@@ -275,6 +239,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertTrue(self.xblock._word_count_valid())
 
     def test_word_count_too_short(self):
+        # pylint: disable=protected-access
         """
         Tests that the word_count_valid method returns the
         appropriate response when the student's answer
@@ -286,6 +251,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertFalse(self.xblock._word_count_valid())
 
     def test_word_count_too_long(self):
+        # pylint: disable=protected-access
         """
         Tests that the word_count_valid method returns the
         appropriate response when the student's answer
@@ -297,7 +263,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertFalse(self.xblock._word_count_valid())
 
     def test_phrase_present_in_answer(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests the phrase_present_in_answer helper method, when at least
         of of the phrases is present in the answer
@@ -312,7 +278,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_pattern_not_present_in_answer(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests the phrase_present_in_answer helper method, when none of the
         phrases are present in the anaswer
@@ -327,7 +293,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_problem_progress_score_zero_weight_singular(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the the string returned by get_problem_progress
         when the weight of the problem is singular, and the score is zero
@@ -340,7 +306,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_problem_progress_score_zero_weight_plural(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the the string returned by get_problem_progress
         when the weight of the problem is plural, and the score is zero
@@ -353,7 +319,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_problem_progress_score_positive_weight_singular(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the the string returned by get_problem_progress
         when the weight of the problem is singular, and the score is positive
@@ -363,7 +329,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(_('1/1 point'), self.xblock._get_problem_progress())
 
     def test_problem_progress_score_positive_weight_plural(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the the string returned by get_problem_progress
         when the weight of the problem is plural, and the score is positive
@@ -376,6 +342,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_compute_score_full_credit(self):
+        # pylint: disable=protected-access
         """
         Tests that a full-credit grade is assigned when appropriate
         """
@@ -395,6 +362,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_compute_score_half_credit(self):
+        # pylint: disable=protected-access
         """
         Tests that a half-credit grade is assigned when appropriate
         """
@@ -414,6 +382,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_compute_score_no_credit(self):
+        # pylint: disable=protected-access
         """
         Tests that a no-credit grade is assigned when appropriate
         """
@@ -433,31 +402,31 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_indicator_visibility_class_blank(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the get_indicator_visibility_class helper
         returns a blank class when appropriate
         """
-        self.xblock.display_correctness = 'true'
+        self.xblock.display_correctness = True
         self.assertEquals(
             '',
             self.xblock._get_indicator_visiblity_class()
         )
 
     def test_indicator_visibility_class_hidden(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that the get_indicator_visibility_class helper
         returns 'hidden' class when appropriate
         """
-        self.xblock.display_correctness = 'fALse'
+        self.xblock.display_correctness = False
         self.assertEquals(
             'hidden',
             self.xblock._get_indicator_visiblity_class()
         )
 
     def test_determine_zero_credit_blank_answer(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Placeholder Docstring
         """
@@ -466,7 +435,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(Credit.zero, self.xblock._determine_credit())
 
     def test_determine_zero_credit_normal_answer(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that determine_credit() returns zero-credit when appropriate
         """
@@ -477,6 +446,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(Credit.zero, self.xblock._determine_credit())
 
     def test_determine_half_credit(self):
+        # pylint: disable=protected-access
         """
         Tests that determine_credit() returns half-credit when appropriate
         """
@@ -487,6 +457,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(Credit.half, self.xblock._determine_credit())
 
     def test_determine_full_credit(self):
+        # pylint: disable=protected-access
         """
         Tests that determine_credit() returns full-credit when appropriate
         """
@@ -497,7 +468,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(Credit.full, self.xblock._determine_credit())
 
     def test_used_attempts_feedback_blank(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that get_used_attempts_feedback returns no feedback when
         appropriate
@@ -506,7 +477,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('', self.xblock._get_used_attempts_feedback())
 
     def test_used_attempts_feedback_normal(self):
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, protected-access
         """
         Tests that get_used_attempts_feedback returns the expected feedback
         """
@@ -518,6 +489,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         )
 
     def test_submit_class_blank(self):
+        # pylint: disable=protected-access
         """
         Tests that get_submit_class returns a blank value when appropriate
         """
@@ -525,6 +497,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('', self.xblock._get_submit_class())
 
     def test_submit_class_nodisplay(self):
+        # pylint: disable=protected-access
         """
         Tests that get_submit_class returns the appropriate class
         when the number of attempts has exceeded the maximum number of
