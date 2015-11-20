@@ -1,33 +1,29 @@
-# FreeText XBlock
-Enables instructors to create questions with free-text responses.
+# Free-text Response XBlock
+XBlock to capture a free-text response.
 
-## TODO List:
-- [ ] Write tests
-- [ ] Update the `student_view`
-    - [ ] `./xblockfreetext/private/view.html`
-        - Add content to `<div class="xblockfreetext_block"></div>` element
-    - [ ] `./xblockfreetext/private/view.js`
-        - Add logic to `XblockFreetextView` function
-    - [ ] `./xblockfreetext/private/view.less`
-        - Add styles to `.xblockfreetext_block { }` block
-    - [ ] `./xblockfreetext/xblockfreetext.py`
-        - Add back-end logic to `student_view` method
-- [ ] Update the `studio_view`
-    - [ ] `./xblockfreetext/private/edit.html`
-        - Add `<LI>` entries to `<ul class="list-input settings-list">` for each new field
-    - [ ] `./xblockfreetext/private/edit.js`
-        - Add entry for each field to `XblockFreetextEdit`
-    - [ ] `./xblockfreetext/private/edit.less`
-        - Add styles to `.xblockfreetext_edit { }` block (if needed)
-    - [ ] `./xblockfreetext/xblockfreetext.py`
-        - Add entry for each field to `studio_view_save`
-- [ ] Update package metadata
-    - [ ] `./package.json`
-        - https://www.npmjs.org/doc/files/package.json.html
-    - [ ] `./setup.py`
-        - https://docs.python.org/2/distutils/setupscript.html#additional-meta-data
-- [ ] Update `./Gruntfile.js`
-    - http://gruntjs.com/getting-started
-- [ ] Update `./README.markdown`
-- [ ] Write documentation
-- [ ] Publish on PyPi
+This package provides an XBlock for use with the EdX Platform and makes
+it possible for instructors to create questions that expect a
+free-text response.
+
+Instructors define the following paramters in Studio:
+- display name
+- display correctness (True/False)
+- Full-Credit Phrases (a list of phrases, of which, one must be present in the student's response in order to receive full-credit)
+- Half-Credit Phrases (a list of phrases, of which, one must be present in the student's response in order to receive at least half-credit)
+- Maximum Number of Attempts
+- Maximum Word Count
+- Minimum Word Count
+- Prompt
+- Question Weight
+
+Students enter and submit their free-text responses, which instantly gets evaluated
+according to the parameters above.
+
+# Installation
+- Add the xblock to your requirements/edx/github.text file
+  e.g. -e git+https://github.com/Stanford-Online/xblock-free-text-response@cfb793db182b60281875b83b53a98640d740ebcf#egg=xblock-free-text-response
+
+- In Studio Settings/Advanced Settings add the xblock to the Advanced Module List.
+  e.g. "freetextresponse"
+
+Now, when you create a component "Free-text Response" should appear in the Advanced Component List.
