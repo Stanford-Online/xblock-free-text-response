@@ -149,7 +149,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.count_attempts = 5
         self.xblock._word_count_valid = MagicMock(return_value=False)
         self.assertIn(
-            _('Invalid Word Count. Your reponse must be between'),
+            _('Invalid Word Count. Your response must be between'),
             self.xblock._get_word_count_message()
         )
 
