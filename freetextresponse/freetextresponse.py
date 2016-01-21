@@ -286,9 +286,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         result = ''
         if self.count_attempts > 0 and not self._word_count_valid():
             result = ungettext(
-                "Invalid Word Count. Your reponse must be "
+                "Invalid Word Count. Your response must be "
                 "between {min} and {max} word.",
-                "Invalid Word Count. Your reponse must be "
+                "Invalid Word Count. Your response must be "
                 "between {min} and {max} words.",
                 self.max_word_count,
             ).format(
