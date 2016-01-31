@@ -104,7 +104,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'This is the minimum number of words required '
             'for this question'
         ),
-        default=0,
+        default=1,
         values={'min': 1},
         scope=Scope.settings,
     )
@@ -226,9 +226,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 'Maximum Word Count cannot be negative'
             )
             validation.add(msg)
-        if data.min_word_count < 0:
+        if data.min_word_count < 1:
             msg = FreeTextResponse._generate_validation_message(
-                'Minimum Word Count cannot be negative'
+                'Minimum Word Count cannot be less than 1'
             )
             validation.add(msg)
         if data.min_word_count > data.max_word_count:

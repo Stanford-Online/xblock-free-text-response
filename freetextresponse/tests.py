@@ -98,7 +98,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(0.0, self.xblock.score)
         self.assertEquals(0, self.xblock.max_attempts)
         self.assertTrue(self.xblock.display_correctness)
-        self.assertEquals(0, self.xblock.min_word_count)
+        self.assertEquals(1, self.xblock.min_word_count)
         self.assertEquals(10000, self.xblock.max_word_count)
         self.assertEquals(
             [],
