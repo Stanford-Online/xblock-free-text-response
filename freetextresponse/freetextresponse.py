@@ -303,8 +303,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = ''
         if (
-                (ignore_attempts or self.count_attempts > 0)
-                and
+                (ignore_attempts or self.count_attempts > 0) and
                 (not self._word_count_valid())
         ):
             result = ungettext(
