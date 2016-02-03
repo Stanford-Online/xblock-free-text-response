@@ -33,6 +33,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         return xblock
 
     def setUp(self):
+        # pylint: disable=super-method-not-called
         self.xblock = FreetextResponseXblockTestCase.make_an_xblock()
         self.client = Client()
         self.test_display_name = 'test_display_name',
@@ -48,6 +49,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
                                           'test halfcredit phrase 2'
         self.test_student_answer = 'test student answer'
         self.test_count_attempts = '3'
+        self.test_submitted_message = 'test submission received message'
 
     def test_student_view(self):
         # pylint: disable=protected-access
@@ -128,7 +130,24 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         user has made zero attempts
         """
         self.xblock.count_attempts = 0
-        self.assertEquals('', self.xblock._get_word_count_message())
+        self.assertEquals(
+            '',
+            self.xblock._get_word_count_message()
+        )
+
+    def test_word_count_message_not_blank_when_attempts_0(self):
+        # pylint: disable=invalid-name, protected-access
+        """
+        Tests that the word count message is blank when the
+        user has made zero attempts
+        """
+        self.xblock.count_attempts = 0
+        self.assertIn(
+            _('Invalid Word Count. Your response must be between'),
+            self.xblock._get_word_count_message(
+                ignore_attempts=True
+            )
+        )
 
     def test_word_count_message_blank_when_word_count_valid(self):
         # pylint: disable=invalid-name, protected-access
@@ -138,7 +157,10 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         """
         self.xblock.count_attempts = 5
         self.xblock._word_count_valid = MagicMock(return_value=True)
-        self.assertEquals('', self.xblock._get_word_count_message())
+        self.assertEquals(
+            '',
+            self.xblock._get_word_count_message()
+        )
 
     def test_invalid_word_count_message(self):
         # pylint: disable=protected-access
@@ -146,11 +168,11 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         Tests that the invalid word count message displays
         when appropriate
         """
-        self.xblock.count_attempts = 5
+        count_attempts = 5
         self.xblock._word_count_valid = MagicMock(return_value=False)
         self.assertIn(
             _('Invalid Word Count. Your response must be between'),
-            self.xblock._get_word_count_message()
+            self.xblock._get_word_count_message(count_attempts)
         )
 
     def test_indicator_class_unanswered(self):
@@ -506,3 +528,40 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.max_attempts = 5
         self.xblock.count_attempts = 6
         self.assertEquals('nodisplay', self.xblock._get_submit_class())
+
+    def test_sm_blank_zero_attempts(self):
+        # pylint: disable=protected-access, invalid-name
+        """
+        Tests that _get_submitted_message returns an empty string
+        when the user has made 0 attempts
+        """
+        self.xblock.count_attempts = 0
+        self.xblock.submitted_message = self.test_submitted_message
+        self.assertEquals('', self.xblock._get_submitted_message())
+
+    def test_sm_blank_word_count_invalid(self):
+        # pylint: disable=protected-access, invalid-name
+        """
+        Tests that _get_submitted_message returns an empty string
+        when the word count is not valid, but the user has made
+        at least one attempt
+        """
+        self.xblock.count_attempts = 2
+        self.xblock.submitted_message = self.test_submitted_message
+        self.xblock._word_count_valid = MagicMock(return_value=False)
+        self.assertEquals('', self.xblock._get_submitted_message())
+
+    def test_srm_nonblank(self):
+        # pylint: disable=protected-access
+        """
+        Tests that _get_submitted_message returns the designated
+        message when the word count is valid and the user has made
+        at least one attempt
+        """
+        self.xblock.count_attempts = 2
+        self.xblock.submitted_message = self.test_submitted_message
+        self.xblock._word_count_valid = MagicMock(return_value=True)
+        self.assertEquals(
+            self.test_submitted_message,
+            self.xblock._get_submitted_message(),
+        )

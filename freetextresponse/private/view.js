@@ -9,6 +9,7 @@ function FreeTextResponseView(runtime, element) {
     var problemProgress = $element.find('.problem-progress');
     var submitParent = $element.find('.Submit').parent();
     var wordCountError = $element.find('.word-count-error');
+    var submissionReceivedMessage = $element.find('.submission-received');
     var url = runtime.handlerUrl(element, 'submit');
     var userInputClass = 'user-input';
 
@@ -32,6 +33,7 @@ function FreeTextResponseView(runtime, element) {
                 submitParent.addClass(response.submit_class);
                 problemProgress.text('(' + response.problem_progress + ')');
                 wordCountError.text(response.word_count_message);
+                submissionReceivedMessage.text(response.submitted_message);
                 buttonSubmit.text('Submit');
 
                 runtime.notify('submit', {
