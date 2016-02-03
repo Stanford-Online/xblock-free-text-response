@@ -104,7 +104,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'This is the minimum number of words required '
             'for this question'
         ),
-        default=0,
+        default=1,
         values={'min': 1},
         scope=Scope.settings,
     )
@@ -115,6 +115,15 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'asked to enter their response'
         ),
         default=_('Please enter your response within this text area'),
+        scope=Scope.settings,
+    )
+    submitted_message = String(
+        display_name=_('Submission Received Message'),
+        help=_(
+            'This is the message students will see upon '
+            'submitting their response'
+        ),
+        default=_('Your submission has been received'),
         scope=Scope.settings,
     )
     weight = Integer(
@@ -153,6 +162,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         'max_word_count',
         'fullcredit_keyphrases',
         'halfcredit_keyphrases',
+        'submitted_message',
     )
 
     def student_view(self, context=None):
@@ -168,7 +178,10 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             used_attempts_feedback=self._get_used_attempts_feedback(),
             submit_class=self._get_submit_class(),
             indicator_visibility_class=self._get_indicator_visiblity_class(),
-            word_count_message=self._get_word_count_message(),
+            word_count_message=self._get_word_count_message(
+                self.count_attempts
+            ),
+            submitted_message=self._get_submitted_message(),
         )
         fragment = self.build_fragment(
             html_source=view_html,
@@ -190,7 +203,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = ValidationMessage(
             ValidationMessage.ERROR,
-            unicode(msg)
+            _(msg)
         )
         return result
 
@@ -213,14 +226,19 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 'Maximum Word Count cannot be negative'
             )
             validation.add(msg)
-        if data.min_word_count < 0:
+        if data.min_word_count < 1:
             msg = FreeTextResponse._generate_validation_message(
-                'Minimum Word Count cannot be negative'
+                'Minimum Word Count cannot be less than 1'
             )
             validation.add(msg)
         if data.min_word_count > data.max_word_count:
             msg = FreeTextResponse._generate_validation_message(
                 'Minimum Word Count cannot be greater than Max Word Count'
+            )
+            validation.add(msg)
+        if not data.submitted_message:
+            msg = FreeTextResponse._generate_validation_message(
+                'Submission Received Message cannot be blank'
             )
             validation.add(msg)
 
@@ -279,12 +297,15 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             result = 'hidden'
         return result
 
-    def _get_word_count_message(self):
+    def _get_word_count_message(self, ignore_attempts=False):
         """
         Returns the word count message based on the student's answer
         """
         result = ''
-        if self.count_attempts > 0 and not self._word_count_valid():
+        if (
+                (ignore_attempts or self.count_attempts > 0) and
+                (not self._word_count_valid())
+        ):
             result = ungettext(
                 "Invalid Word Count. Your response must be "
                 "between {min} and {max} word.",
@@ -304,7 +325,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         result = ''
         if self.count_attempts == 0:
             result = 'unanswered'
-        elif (self._determine_credit() == Credit.zero):
+        elif self._determine_credit() == Credit.zero:
             result = 'incorrect'
         else:
             result = 'correct'
@@ -343,8 +364,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         result = ''
         if self.score == 0.0:
             result = ungettext(
-                '{weight} point possible',
-                '{weight} points possible',
+                "{weight} point possible",
+                "{weight} points possible",
                 self.weight,
             ).format(
                 weight=self.weight
@@ -352,11 +373,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         else:
             score_string = '{0:g}'.format(self.score)
             result = ungettext(
-                score_string + '/' + "{weight} point",
-                score_string + '/' + "{weight} points",
+                "{score_string}/{weight} point",
+                "{score_string}/{weight} points",
                 self.weight,
             ).format(
-                weight=self.weight
+                score_string=score_string,
+                weight=self.weight,
             )
         return result
 
@@ -432,6 +454,15 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             result = 'nodisplay'
         return result
 
+    def _get_submitted_message(self):
+        """
+        Returns the message to display in the submission-received div
+        """
+        result = ''
+        if self.count_attempts > 0 and self._word_count_valid():
+            result = self.submitted_message
+        return result
+
     @XBlock.json_handler
     def submit(self, data, suffix=''):
         # pylint: disable=unused-argument
@@ -446,18 +477,22 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 )
             )
         self.student_answer = data['student_answer']
-        if self.max_attempts == 0:
-            self.count_attempts = 1
-        else:
-            self.count_attempts += 1
-        self._compute_score()
+        if self._word_count_valid():
+            if self.max_attempts == 0:
+                self.count_attempts = 1
+            else:
+                self.count_attempts += 1
+            self._compute_score()
         result = {
             'status': 'success',
             'problem_progress': self._get_problem_progress(),
             'indicator_class': self._get_indicator_class(),
             'used_attempts_feedback': self._get_used_attempts_feedback(),
             'submit_class': self._get_submit_class(),
-            'word_count_message': self._get_word_count_message(),
+            'word_count_message': self._get_word_count_message(
+                ignore_attempts=True
+            ),
+            'submitted_message': self._get_submitted_message(),
         }
         return result
 

@@ -7,7 +7,7 @@ package_json = json.load(package_json_file)
 
 setuptools.setup(
     name=package_json.get('name', 'xblock-test'),
-    version=package_json.get('version', '0.1.0'),
+    version=package_json.get('version', '0.1.1'),
     description=package_json.get('description'),
     long_description=package_json.get('description'),
     author=package_json.get('author', {}).get('name'),
