@@ -132,7 +132,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'This assigns an integer value representing '
             'the weight of this problem'
         ),
-        default=1,
+        default=0,
         values={'min': 1},
         scope=Scope.settings,
     )
@@ -361,24 +361,29 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         Returns a statement of progress for the XBlock, which depends
         on the user's current score
         """
-        result = ''
-        if self.score == 0.0:
-            result = ungettext(
-                "{weight} point possible",
-                "{weight} points possible",
-                self.weight,
-            ).format(
-                weight=self.weight
+        if self.weight == 0:
+            result = ''
+        elif self.score == 0.0:
+            result = "({})".format(
+                ungettext(
+                    "{weight} point possible",
+                    "{weight} points possible",
+                    self.weight,
+                ).format(
+                    weight=self.weight
+                )
             )
         else:
             score_string = '{0:g}'.format(self.score)
-            result = ungettext(
-                "{score_string}/{weight} point",
-                "{score_string}/{weight} points",
-                self.weight,
-            ).format(
-                score_string=score_string,
-                weight=self.weight,
+            result = "({})".format(
+                ungettext(
+                    "{score_string}/{weight} point",
+                    "{score_string}/{weight} points",
+                    self.weight,
+                ).format(
+                    score_string=score_string,
+                    weight=self.weight,
+                )
             )
         return result
 
