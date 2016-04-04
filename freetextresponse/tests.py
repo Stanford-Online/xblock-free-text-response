@@ -75,15 +75,15 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertIn(str(self.xblock.max_word_count), studio_view_html)
         self.assertIn(
             ', '.join(
-                self.xblock.fullcredit_keyphrases
+                self.xblock.fullcredit_keyphrases,
             ),
-            studio_view_html
+            studio_view_html,
         )
         self.assertIn(
             ', '.join(
-                self.xblock.halfcredit_keyphrases
+                self.xblock.halfcredit_keyphrases,
             ),
-            studio_view_html
+            studio_view_html,
         )
 
     def test_initialization_variables(self):
@@ -93,7 +93,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('Free-text Response', self.xblock.display_name)
         self.assertEquals(
             'Please enter your response within this text area',
-            self.xblock.prompt
+            self.xblock.prompt,
         )
         self.assertEquals(0.0, self.xblock.score)
         self.assertEquals(0, self.xblock.max_attempts)
@@ -102,11 +102,11 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals(10000, self.xblock.max_word_count)
         self.assertEquals(
             [],
-            self.xblock.fullcredit_keyphrases
+            self.xblock.fullcredit_keyphrases,
         )
         self.assertEquals(
             [],
-            self.xblock.halfcredit_keyphrases
+            self.xblock.halfcredit_keyphrases,
         )
         self.assertEquals('', self.xblock.student_answer)
         self.assertEquals(0, self.xblock.count_attempts)
@@ -132,7 +132,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.count_attempts = 0
         self.assertEquals(
             '',
-            self.xblock._get_word_count_message()
+            self.xblock._get_word_count_message(),
         )
 
     def test_word_count_message_not_blank_when_attempts_0(self):
@@ -145,8 +145,8 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertIn(
             _('Invalid Word Count. Your response must be between'),
             self.xblock._get_word_count_message(
-                ignore_attempts=True
-            )
+                ignore_attempts=True,
+            ),
         )
 
     def test_word_count_message_blank_when_word_count_valid(self):
@@ -292,11 +292,11 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         """
         phrases = ["Battle Ends", "And", "Down", "Goes", "Charles' Father"]
         answer = "chArles' fAther"
-        self.assertEqual(
-            True,
+        self.assertTrue(
             FreeTextResponse._is_at_least_one_phrase_present(
-                phrases, answer
-            )
+                phrases,
+                answer,
+            ),
         )
 
     def test_pattern_not_present_in_answer(self):
@@ -310,8 +310,8 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertFalse(
             FreeTextResponse._is_at_least_one_phrase_present(
                 phrases,
-                answer
-            )
+                answer,
+            ),
         )
 
     def test_problem_progress_weight_zero(self):
@@ -334,7 +334,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.weight = 1
         self.assertEquals(
             _('(1 point possible)'),
-            self.xblock._get_problem_progress()
+            self.xblock._get_problem_progress(),
         )
 
     def test_problem_progress_score_zero_weight_plural(self):
@@ -347,7 +347,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.weight = 3
         self.assertEquals(
             _('(3 points possible)'),
-            self.xblock._get_problem_progress()
+            self.xblock._get_problem_progress(),
         )
 
     def test_problem_progress_score_positive_weight_singular(self):
@@ -358,7 +358,10 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         """
         self.xblock.score = 1
         self.xblock.weight = 1
-        self.assertEquals(_('(1/1 point)'), self.xblock._get_problem_progress())
+        self.assertEquals(
+            _('(1/1 point)'),
+            self.xblock._get_problem_progress(),
+        )
 
     def test_problem_progress_score_positive_weight_plural(self):
         # pylint: disable=invalid-name, protected-access
@@ -370,7 +373,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.weight = 3
         self.assertEquals(
             _('(1.5/3 points)'),
-            self.xblock._get_problem_progress()
+            self.xblock._get_problem_progress(),
         )
 
     def test_compute_score_full_credit(self):
@@ -390,7 +393,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': 5.0, 'max_value': 5}
+            {'value': 5.0, 'max_value': 5},
         )
 
     def test_compute_score_half_credit(self):
@@ -410,7 +413,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': 2.5, 'max_value': 5}
+            {'value': 2.5, 'max_value': 5},
         )
 
     def test_compute_score_no_credit(self):
@@ -430,7 +433,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': 0.0, 'max_value': 5}
+            {'value': 0.0, 'max_value': 5},
         )
 
     def test_indicator_visibility_class_blank(self):
@@ -442,7 +445,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.display_correctness = True
         self.assertEquals(
             '',
-            self.xblock._get_indicator_visiblity_class()
+            self.xblock._get_indicator_visiblity_class(),
         )
 
     def test_indicator_visibility_class_hidden(self):
@@ -454,7 +457,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.display_correctness = False
         self.assertEquals(
             'hidden',
-            self.xblock._get_indicator_visiblity_class()
+            self.xblock._get_indicator_visiblity_class(),
         )
 
     def test_determine_zero_credit_blank_answer(self):
@@ -517,7 +520,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.count_attempts = 3
         self.assertEquals(
             _('You have used 3 of 5 submissions'),
-            self.xblock._get_used_attempts_feedback()
+            self.xblock._get_used_attempts_feedback(),
         )
 
     def test_submit_class_blank(self):

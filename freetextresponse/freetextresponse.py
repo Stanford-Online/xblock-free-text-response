@@ -370,7 +370,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                     "{weight} points possible",
                     self.weight,
                 ).format(
-                    weight=self.weight
+                    weight=self.weight,
                 )
             )
         else:
