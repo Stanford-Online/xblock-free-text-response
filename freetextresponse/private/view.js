@@ -31,7 +31,7 @@ function FreeTextResponseView(runtime, element) {
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
                 submitParent.removeClass();
                 submitParent.addClass(response.submit_class);
-                problemProgress.text('(' + response.problem_progress + ')');
+                problemProgress.text(response.problem_progress);
                 wordCountError.text(response.word_count_message);
                 submissionReceivedMessage.text(response.submitted_message);
                 buttonSubmit.text('Submit');
