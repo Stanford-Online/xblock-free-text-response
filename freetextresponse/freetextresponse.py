@@ -118,6 +118,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         ),
         default=_('Please enter your response within this text area'),
         scope=Scope.settings,
+        multiline_editor=True,
     )
     submitted_message = String(
         display_name=_('Submission Received Message'),
