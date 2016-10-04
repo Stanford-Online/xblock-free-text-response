@@ -4,14 +4,28 @@ function FreeTextResponseView(runtime, element) {
     var $ = window.jQuery;
     var $element = $(element);
     var buttonSubmit = $element.find('.check.Submit');
-    var textareaParent = $element.find('.student_answer').parent();
+    var buttonSave = $element.find('.save');
     var usedAttemptsFeedback = $element.find('.action .used-attempts-feedback');
     var problemProgress = $element.find('.problem-progress');
-    var submitParent = $element.find('.Submit').parent();
-    var wordCountError = $element.find('.word-count-error');
     var submissionReceivedMessage = $element.find('.submission-received');
+    var userAlertMessage = $element.find('.user_alert');
+    var textareaStudentAnswer = $element.find('.student_answer');
+    var textareaParent = textareaStudentAnswer.parent();
+
     var url = runtime.handlerUrl(element, 'submit');
-    var userInputClass = 'user-input';
+    var urlSave = runtime.handlerUrl(element, 'save_reponse');
+
+    // POLYFILL notify if it does not exist. Like in the xblock workbench.
+    runtime.notify = runtime.notify || function () {
+        console.log('POLYFILL runtime.notify', arguments);
+    };
+
+    function setClassForTextAreaParent(new_class) {
+        textareaParent.removeClass('correct');
+        textareaParent.removeClass('incorrect');
+        textareaParent.removeClass('unanswered');
+        textareaParent.addClass(new_class); 
+    }
 
     buttonSubmit.on('click', function () {
         buttonSubmit.text('Checking...');
@@ -25,17 +39,15 @@ function FreeTextResponseView(runtime, element) {
                 'student_answer': $element.find('.student_answer').val()
             }),
             success: function buttonSubmitOnSuccess(response) {
-                textareaParent.removeClass();
-                textareaParent.addClass(userInputClass);
-                textareaParent.addClass(response.indicator_class);
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
-                submitParent.removeClass();
-                submitParent.addClass(response.submit_class);
+                buttonSubmit.addClass(response.nodisplay_class);
                 problemProgress.text(response.problem_progress);
-                wordCountError.text(response.word_count_message);
                 submissionReceivedMessage.text(response.submitted_message);
                 buttonSubmit.text('Submit');
-
+                userAlertMessage.text(response.user_alert);
+                buttonSave.addClass(response.nodisplay_class);
+                setClassForTextAreaParent(response.indicator_class); 
+ 
                 runtime.notify('submit', {
                     state: 'end'
                 });
@@ -45,5 +57,43 @@ function FreeTextResponseView(runtime, element) {
             }
         });
         return false;
+    });
+
+    buttonSave.on('click', function () {
+        buttonSave.text('Checking...');
+        runtime.notify('save', {
+            message: 'Saving...',
+            state: 'start'
+        });
+        $.ajax(urlSave, {
+            type: 'POST',
+            data: JSON.stringify({
+                'student_answer': $element.find('.student_answer').val()
+            }),
+            success: function buttonSaveOnSuccess(response) {
+                buttonSubmit.addClass(response.nodisplay_class);
+                buttonSave.addClass(response.nodisplay_class);
+                usedAttemptsFeedback.text(response.used_attempts_feedback);
+                problemProgress.text(response.problem_progress);
+                submissionReceivedMessage.text(response.submitted_message);
+                buttonSave.text('Save');
+                userAlertMessage.text(response.user_alert);
+
+                runtime.notify('save', {
+                    state: 'end'
+                });
+            },
+            error: function buttonSaveOnError() {
+                runtime.notify('error', {});
+            }
+        });
+        return false;
+    });
+
+    textareaStudentAnswer.on('keydown', function() {
+        // Reset Messages
+        submissionReceivedMessage.text('');
+        userAlertMessage.text('');
+        setClassForTextAreaParent('unanswered');
     });
 }
