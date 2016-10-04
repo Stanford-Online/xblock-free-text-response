@@ -1,24 +1,27 @@
-<div class="freetextresponse">
+<div class="freetextresponse xmodule_display xmodule_CapaModule problem">
     <h2 class="problem-header">{self.display_name}</h2>
     <div class="problem-progress">{problem_progress}</div>
     <p>{self.prompt}</p>
-    <div class="user-input {indicator_class}">
-        <textarea class="student_answer" style="height:150px" rows="20" cols="70">{self.student_answer}</textarea>
-        <span class="status {indicator_visibility_class}" aria-describedby="student_answer"></span>
+    <div class="capa_inputtype textline">
+        <div class="user_input {indicator_class}">
+            <textarea class="student_answer" rows="20" cols="70">{self.student_answer}</textarea>
+            <span class="status {visibility_class}" aria-describedby="student_answer"></span>
+        </div>
     </div>
-    <div class="submission-received">
+    <div class="capa_alert submission-received">
         {submitted_message}
     </div>
-    <div class="word-count-error">
-        {word_count_message}
-    </div>
     <div class="action">
-        <span class="{submit_class}">
-            <button class="check Submit" data-checking="Checking..." data-value="Submit" aria-disabled="false">
-                Submit
-            </button>
-        </span>
+        <button class="check Submit {nodisplay_class}" data-checking="Checking..." data-value="Submit">
+            Submit
+        </button>
+        <button class="save {nodisplay_class}" data-value="Save">
+            Save
+        </button>
         <div class="used-attempts-feedback" aria-live="polite">{used_attempts_feedback}</div>
+    </div>
+    <div class="capa_alert user_alert">
+        {user_alert}
     </div>
 </div>
 
