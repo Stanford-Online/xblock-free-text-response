@@ -374,7 +374,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 )
             )
         else:
-            score_string = '{0:g}'.format(self.score)
+            scaled_score = self.score * self.weight
+            score_string = '{0:g}'.format(scaled_score)
             result = "({})".format(
                 ungettext(
                     "{score_string}/{weight} point",
@@ -393,18 +394,13 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         based on their answer
         """
         credit = self._determine_credit()
-        if credit == Credit.full:
-            self.score = self.weight
-        elif credit == Credit.half:
-            self.score = float(self.weight)/2
-        else:
-            self.score = 0.0
+        self.score = credit
         self.runtime.publish(
             self,
             'grade',
             {
                 'value': self.score,
-                'max_value': self.weight
+                'max_value': Credit.full
             }
         )
 
@@ -508,6 +504,6 @@ class Credit(Enum):
     An enumeration of the different types of credit a submission can be
     awareded: Zero Credit, Half Credit, and Full Credit
     """
-    zero = 0
-    half = 1
-    full = 2
+    zero = 0.0
+    half = 0.5
+    full = 1.0

@@ -369,10 +369,10 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         Tests that the the string returned by get_problem_progress
         when the weight of the problem is plural, and the score is positive
         """
-        self.xblock.score = 1.5
+        self.xblock.score = 1
         self.xblock.weight = 3
         self.assertEquals(
-            _('(1.5/3 points)'),
+            _('(3/3 points)'),
             self.xblock._get_problem_progress(),
         )
 
@@ -388,12 +388,11 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             return Credit.full
         self.xblock.runtime.publish = MagicMock(return_value=None)
         self.xblock._determine_credit = MagicMock(side_effect=get_full_credit)
-        self.xblock.weight = 5
         self.xblock._compute_score()
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': 5.0, 'max_value': 5},
+            {'value': Credit.full, 'max_value': Credit.full},
         )
 
     def test_compute_score_half_credit(self):
@@ -408,12 +407,11 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             return Credit.half
         self.xblock.runtime.publish = MagicMock(return_value=None)
         self.xblock._determine_credit = MagicMock(side_effect=get_half_credit)
-        self.xblock.weight = 5
         self.xblock._compute_score()
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': 2.5, 'max_value': 5},
+            {'value': Credit.half, 'max_value': Credit.full},
         )
 
     def test_compute_score_no_credit(self):
@@ -428,12 +426,11 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             return Credit.zero
         self.xblock.runtime.publish = MagicMock(return_value=None)
         self.xblock._determine_credit = MagicMock(side_effect=get_no_credit)
-        self.xblock.weight = 5
         self.xblock._compute_score()
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': 0.0, 'max_value': 5},
+            {'value': Credit.zero, 'max_value': Credit.full},
         )
 
     def test_indicator_visibility_class_blank(self):
