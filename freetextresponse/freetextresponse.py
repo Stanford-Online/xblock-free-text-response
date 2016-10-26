@@ -394,13 +394,13 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         based on their answer
         """
         credit = self._determine_credit()
-        self.score = credit
+        self.score = credit.value
         self.runtime.publish(
             self,
             'grade',
             {
                 'value': self.score,
-                'max_value': Credit.full
+                'max_value': Credit.full.value
             }
         )
 
