@@ -392,7 +392,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': Credit.full, 'max_value': Credit.full},
+            {'value': Credit.full.value, 'max_value': Credit.full.value},
         )
 
     def test_compute_score_half_credit(self):
@@ -411,7 +411,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': Credit.half, 'max_value': Credit.full},
+            {'value': Credit.half.value, 'max_value': Credit.full.value},
         )
 
     def test_compute_score_no_credit(self):
@@ -430,7 +430,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.xblock.runtime.publish.assert_called_with(
             self.xblock,
             'grade',
-            {'value': Credit.zero, 'max_value': Credit.full},
+            {'value': Credit.zero.value, 'max_value': Credit.full.value},
         )
 
     def test_indicator_visibility_class_blank(self):
