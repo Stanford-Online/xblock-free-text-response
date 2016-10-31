@@ -2,83 +2,41 @@
 This is the core logic for the Free-text Response XBlock
 """
 
-import os
 
 import pkg_resources
-from django.utils.translation import ugettext as _
-from django.utils.translation import ungettext
+import os
 from enum import Enum
+
 from xblock.core import XBlock
-from xblock.fields import Boolean
-from xblock.fields import Float
-from xblock.fields import Integer
-from xblock.fields import List
-from xblock.fields import Scope
-from xblock.fields import String
+from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xblock.fields import Scope, Boolean, String, Float, Integer, List
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin
+
+from django.utils.translation import ugettext as _
+from django.utils.translation import ungettext
+
+
+# Helper class
+class Credit(Enum):
+    # pylint: disable=too-few-public-methods
+    """
+    An enumeration of the different types of credit a submission can be
+    awareded: Zero Credit, Half Credit, and Full Credit
+    """
+    zero = 0.0
+    half = 0.5
+    full = 1.0
 
 
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
+    # pylint: disable=R0904
     """
     Enables instructors to create questions with free-text responses.
     """
-    @staticmethod
-    def workbench_scenarios():
-        """
-        Gather scenarios to be displayed in the workbench
-        """
-        scenarios = [
-            ('Free-text Response XBlock',
-             '''<sequence_demo>
-                    <freetextresponse />
-                    <freetextresponse
-                        display_name="Full Credit is asdf, half is fdsa"
-                        fullcredit_keyphrases="['asdf']"
-                        halfcredit_keyphrases="['fdsa']"
-                    />
-                    <freetextresponse
-                        display_name="Min words 2"
-                        min_word_count="2"
-                    />
-                    <freetextresponse
-                        display_name="Max Attempts 5 XBlock"
-                        max_attempts="5"
-                    />
-                    <freetextresponse
-                        display_name="Full credit is asdf, Max Attempts 3"
-                        max_attempts="3"
-                        fullcredit_keyphrases="['asdf']"
-                    />
-                    <freetextresponse
-                        display_name="New submitted message"
-                        submitted_message="Different message"
-                    />
-                    <freetextresponse
-                        display_name="Blank submitted message"
-                        submitted_message=""
-                    />
-                    <freetextresponse
-                        display_name="Display correctness if off"
-                        display_correctness="False"
-                    />
-                </sequence_demo>
-             '''),
-        ]
-        return scenarios
 
-    display_correctness = Boolean(
-        display_name=_('Display Correctness?'),
-        help=_(
-            'This is a flag that indicates if the indicator '
-            'icon should be displayed after a student enters '
-            'their response'
-        ),
-        default=True,
-        scope=Scope.settings,
-    )
+    # Instructor Facing Editable Fields
     display_name = String(
         display_name=_('Display Name'),
         help=_(
@@ -87,12 +45,53 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         default=_('Free-text Response'),
         scope=Scope.settings,
     )
+    prompt = String(
+        display_name=_('Prompt'),
+        help=_(
+            'This is the prompt students will see when '
+            'asked to enter their response'
+        ),
+        default=_('Please enter your response within this text area'),
+        scope=Scope.settings,
+        multiline_editor=True,
+    )
+    max_attempts = Integer(
+        display_name=_('Maximum Number of Attempts'),
+        help=_(
+            'This is the maximum number of times a '
+            'student is allowed to attempt the problem'
+        ),
+        default=0,
+        values={'min': 1},
+        scope=Scope.settings,
+    )
+    weight = Integer(
+        display_name=_('Weight'),
+        help=_(
+            'This assigns an integer value representing '
+            'the weight of this problem'
+        ),
+        default=0,
+        values={'min': 1},
+        scope=Scope.settings,
+    )
     fullcredit_keyphrases = List(
         display_name=_('Full-Credit Key Phrases'),
         help=_(
             'This is a list of words or phrases, one of '
             'which must be present in order for the student\'s answer '
-            'to receive full credit'
+            'to receive full credit. '
+            'List may contain dictionaries with phrase, hints '
+            'and feedback keys. '
+            'Example: '
+            '{ '
+            ' "phrase": "Answer phrase", '
+            ' "feedback": "User feedback" '
+            '}, '
+            '{ '
+            ' "phrase": "Another answer phrase", '
+            ' "feedback": "With user feedback" '
+            '}'
         ),
         default=[],
         scope=Scope.settings,
@@ -107,13 +106,33 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         default=[],
         scope=Scope.settings,
     )
-    max_attempts = Integer(
-        display_name=_('Maximum Number of Attempts'),
+    zerocredit_keyphrases = List(
+        display_name=_('Zero-Credit Key Phrases'),
         help=_(
-            'This is the maximum number of times a '
-            'student is allowed to attempt the problem'
+            'This is a list of common incorrect '
+            'words or phrases to provide constructive '
+            'feedback to the user'
         ),
-        default=0,
+        default=[],
+        scope=Scope.settings,
+    )
+    display_correctness = Boolean(
+        display_name=_('Display Correctness?'),
+        help=_(
+            'This is a flag that indicates if the indicator '
+            'icon should be displayed after a student enters '
+            'their response'
+        ),
+        default=True,
+        scope=Scope.settings,
+    )
+    min_word_count = Integer(
+        display_name=_('Minimum Word Count'),
+        help=_(
+            'This is the minimum number of words required '
+            'for this question'
+        ),
+        default=1,
         values={'min': 1},
         scope=Scope.settings,
     )
@@ -127,25 +146,14 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         values={'min': 1},
         scope=Scope.settings,
     )
-    min_word_count = Integer(
-        display_name=_('Minimum Word Count'),
+    hints = List(
+        display_name=_('Hint Phrases'),
         help=_(
-            'This is the minimum number of words required '
-            'for this question'
+            'This is a list of hints to display to the '
+            'user'
         ),
-        default=1,
-        values={'min': 1},
+        default=[],
         scope=Scope.settings,
-    )
-    prompt = String(
-        display_name=_('Prompt'),
-        help=_(
-            'This is the prompt students will see when '
-            'asked to enter their response'
-        ),
-        default=_('Please enter your response within this text area'),
-        scope=Scope.settings,
-        multiline_editor=True,
     )
     submitted_message = String(
         display_name=_('Submission Received Message'),
@@ -156,16 +164,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         default=_('Your submission has been received'),
         scope=Scope.settings,
     )
-    weight = Integer(
-        display_name=_('Weight'),
-        help=_(
-            'This assigns an integer value representing '
-            'the weight of this problem'
-        ),
-        default=0,
-        values={'min': 1},
-        scope=Scope.settings,
-    )
+
+    # Not instructor facing fields
     saved_message = String(
         display_name=_('Draft Received Message'),
         help=_(
@@ -191,50 +191,35 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         default='',
         scope=Scope.user_state,
     )
+    hint_counter = Integer(
+        default=0,
+        scope=Scope.user_state,
+    )
 
     has_score = True
 
     editable_fields = (
         'display_name',
         'prompt',
-        'weight',
+        # Minutes allowed
         'max_attempts',
+        'weight',
+        # Randomization
+        # Show Answer
+        # Show Reset
+        # Timer Between Attempts
+        # Minutes Before Warning
+        'fullcredit_keyphrases',
+        'halfcredit_keyphrases',
+        'zerocredit_keyphrases',
+        'hints',
         'display_correctness',
         'min_word_count',
         'max_word_count',
-        'fullcredit_keyphrases',
-        'halfcredit_keyphrases',
         'submitted_message',
     )
 
-    def student_view(self, context=None):
-        # pylint: disable=unused-argument
-        """
-        Build the fragment for the default student view
-        """
-        view_html = FreeTextResponse.get_resource_string('view.html')
-        view_html = view_html.format(
-            self=self,
-            indicator_class=self._get_indicator_class(),
-            problem_progress=self._get_problem_progress(),
-            used_attempts_feedback=self._get_used_attempts_feedback(),
-            nodisplay_class=self._get_nodisplay_class(),
-            visibility_class=self._get_indicator_visibility_class(),
-            submitted_message='',
-            user_alert='',
-        )
-        fragment = self.build_fragment(
-            html_source=view_html,
-            paths_css=[
-                'view.less.min.css',
-            ],
-            paths_js=[
-                'view.js.min.js',
-            ],
-            fragment_js='FreeTextResponseView',
-        )
-        return fragment
-
+    # Editable Field Validation
     @classmethod
     def _generate_validation_message(cls, msg):
         """
@@ -282,105 +267,24 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
             validation.add(msg)
 
-    @classmethod
-    def get_resource_string(cls, path):
+    # Scoring
+    def _compute_score(self):
         """
-        Retrieve string contents for the file path
+        Computes and publishes the user's core for the XBlock
+        based on their answer
         """
-        path = os.path.join('public', path)
-        resource_string = pkg_resources.resource_string(__name__, path)
-        return resource_string.decode('utf8')
-
-    def get_resource_url(self, path):
-        """
-        Retrieve a public URL for the file path
-        """
-        path = os.path.join('public', path)
-        resource_url = self.runtime.local_resource_url(self, path)
-        return resource_url
-
-    def build_fragment(
+        credit = self._determine_credit()
+        #pylint: disable=maybe-no-member
+        self.score = credit.value
+        #pylint: disable=maybe-no-member
+        self.runtime.publish(
             self,
-            html_source=None,
-            paths_css=[],
-            paths_js=[],
-            urls_css=[],
-            urls_js=[],
-            fragment_js=None,
-    ):
-        #  pylint: disable=dangerous-default-value, too-many-arguments
-        """
-        Assemble the HTML, JS, and CSS for an XBlock fragment
-        """
-        fragment = Fragment(html_source)
-        for url in urls_css:
-            fragment.add_css_url(url)
-        for path in paths_css:
-            url = self.get_resource_url(path)
-            fragment.add_css_url(url)
-        for url in urls_js:
-            fragment.add_javascript_url(url)
-        for path in paths_js:
-            url = self.get_resource_url(path)
-            fragment.add_javascript_url(url)
-        if fragment_js:
-            fragment.initialize_js(fragment_js)
-        return fragment
-
-    def _get_indicator_visibility_class(self):
-        """
-        Returns the visibility class for the correctness indicator html element
-        """
-        if self.display_correctness:
-            result = ''
-        else:
-            result = 'hidden'
-        return result
-
-    def _get_word_count_message(self, ignore_attempts=False):
-        """
-        Returns the word count message based on the student's answer
-        """
-        result = ''
-        if (
-                (ignore_attempts or self.count_attempts > 0) and
-                (not self._word_count_valid())
-        ):
-            result = ungettext(
-                "Invalid Word Count. Your response must be "
-                "between {min} and {max} word.",
-                "Invalid Word Count. Your response must be "
-                "between {min} and {max} words.",
-                self.max_word_count,
-            ).format(
-                min=self.min_word_count,
-                max=self.max_word_count,
-            )
-        return result
-
-    def _get_indicator_class(self):
-        """
-        Returns the class of the correctness indicator element
-        """
-        result = 'unanswered'
-        if self.display_correctness and self._word_count_valid():
-            if self._determine_credit() == Credit.zero:
-                result = 'incorrect'
-            else:
-                result = 'correct'
-        return result
-
-    def _word_count_valid(self):
-        """
-        Returns a boolean value indicating whether the current
-        word count of the user's answer is valid
-        """
-        word_count = len(self.student_answer.split())
-        result = (
-            word_count <= self.max_word_count and
-            word_count >= self.min_word_count
+            'grade',
+            {
+                'value': self.score,
+                'max_value': Credit.full.value
+            }
         )
-        return result
 
     @classmethod
     def _is_at_least_one_phrase_present(cls, phrases, answer):
@@ -395,6 +299,59 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         ]
         return any(matches)
 
+    def _determine_credit(self):
+        """
+        Helper Method that determines the level of credit that
+        the user should earn based on their answer
+        """
+        result = None
+        # Get phrases
+        fullcredit_keyphrases = []
+        for item in self.fullcredit_keyphrases:
+            if 'dict' == type(item).__name__:
+                phrase = item.get('phrase', self.fullcredit_keyphrases)
+                fullcredit_keyphrases.append(phrase)
+            else:
+                fullcredit_keyphrases.append(item)
+        halfcredit_keyphrases = []
+        for item in self.halfcredit_keyphrases:
+            if 'dict' == type(item).__name__:
+                phrase = item.get('phrase', self.halfcredit_keyphrases)
+                halfcredit_keyphrases.append(phrase)
+            else:
+                halfcredit_keyphrases.append(item)
+        # Determine Credit
+        if not self.fullcredit_keyphrases \
+                and not self.halfcredit_keyphrases:
+            # No full or half credit answers specified
+            result = Credit.full
+        elif FreeTextResponse._is_at_least_one_phrase_present(
+                fullcredit_keyphrases,
+                self.student_answer
+        ):
+            result = Credit.full
+        elif FreeTextResponse._is_at_least_one_phrase_present(
+                halfcredit_keyphrases,
+                self.student_answer
+        ):
+            result = Credit.half
+        else:
+            result = Credit.zero
+        return result
+
+    def _word_count_valid(self):
+        """
+        Returns a boolean value indicating whether the current
+        word count of the user's answer is valid
+        """
+        word_count = len(self.student_answer.split())
+        result = (
+            word_count <= self.max_word_count and
+            word_count >= self.min_word_count
+        )
+        return result
+
+    # Messages to Student
     def _get_problem_progress(self):
         """
         Returns a statement of progress for the XBlock, which depends
@@ -427,47 +384,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
         return result
 
-    def _compute_score(self):
-        """
-        Computes and publishes the user's core for the XBlock
-        based on their answer
-        """
-        credit = self._determine_credit()
-        self.score = credit.value
-        self.runtime.publish(
-            self,
-            'grade',
-            {
-                'value': self.score,
-                'max_value': Credit.full.value
-            }
-        )
-
-    def _determine_credit(self):
-        """
-        Helper Method that determines the level of credit that
-        the user should earn based on their answer
-        """
-        result = None
-        if self.student_answer == '' or not self._word_count_valid():
-            result = Credit.zero
-        elif not self.fullcredit_keyphrases \
-                and not self.halfcredit_keyphrases:
-            result = Credit.full
-        elif FreeTextResponse._is_at_least_one_phrase_present(
-                self.fullcredit_keyphrases,
-                self.student_answer
-        ):
-            result = Credit.full
-        elif FreeTextResponse._is_at_least_one_phrase_present(
-                self.halfcredit_keyphrases,
-                self.student_answer
-        ):
-            result = Credit.half
-        else:
-            result = Credit.zero
-        return result
-
     def _get_used_attempts_feedback(self):
         """
         Returns the text with feedback to the user about the number of attempts
@@ -485,63 +401,241 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
         return result
 
-    def _get_nodisplay_class(self):
-        """
-        Returns the css class for the submit button
-        """
-        result = ''
-        if self.max_attempts > 0 and self.count_attempts >= self.max_attempts:
-            result = 'nodisplay'
-        return result
-
-    def _get_submitted_message(self):
+    def _get_submitted_message(self, feedback_text=''):
         """
         Returns the message to display in the submission-received div
         """
         result = ''
-        if self._word_count_valid():
+        if self._word_count_valid() and not feedback_text:
             result = self.submitted_message
+        return result
+
+    @classmethod
+    def _get_feedback_if_phrase_present(cls, phrase_dicts, answer):
+        """
+        Determines if at least one of the supplied phrases is
+        present and returns feedback if it exists
+        """
+        answer = answer.lower()
+        for item in phrase_dicts:
+            if 'dict' == type(item).__name__:
+                phrase = item.get('phrase', None)
+                feedback = item.get('feedback', None)
+                if phrase and phrase.lower() in answer:
+                    # Answer match
+                    return feedback
+            elif item.lower() in answer:
+                # Answer match but no feedback
+                break
+
+    def _get_feedback(self):
+        """
+        Returns the feedback message for a user submission
+        Feedback may not exists for answer but may still be
+        full, half, or zero credit
+        """
+        feedback_label = ''
+        feedback_text = ''
+        # Use score to set feedback label and keyphrases
+        keyphrases = self.zerocredit_keyphrases
+        if self.score == Credit.full.value:
+            feedback_label = 'Correct:'
+            keyphrases = self.fullcredit_keyphrases
+        elif self.score == Credit.half.value:
+            feedback_label = 'Correct:'
+            keyphrases = self.halfcredit_keyphrases
+        elif self.score == Credit.zero.value:
+            feedback_label = 'Incorrect:'
+        # Find feedback if it exists in keyphrases
+        feedback_text = FreeTextResponse._get_feedback_if_phrase_present(
+            keyphrases,
+            self.student_answer,
+        )
+        # Clear label if feedback DNE
+        if not feedback_text:
+            return ('', '')
+        else:
+            return (feedback_label, feedback_text)
+
+    def _get_hint_text(self):
+        """
+        Returns a hint message to display in the user
+        """
+        result = ''
+        hints_total = len(self.hints)
+        if 0 < hints_total:
+            hint_mod = self.hint_counter % hints_total
+            result = _(
+                "Hint ({hint_number} of {hints_total}):"
+                "{hint}",
+            ).format(
+                hint_number=hint_mod + 1,
+                hints_total=hints_total,
+                hint=self.hints[hint_mod],
+            )
+            self.hint_counter += 1
         return result
 
     def _get_user_alert(self, ignore_attempts=False):
         """
-        Returns the message to display in the user_alert(TBD) div
+        Returns the message to display in the user_alert div
         """
         result = ''
         if not self._word_count_valid():
             result = self._get_word_count_message(ignore_attempts)
         return result
 
+    def _get_word_count_message(self, ignore_attempts=False):
+        """
+        Returns the word count message based on the student's answer
+        """
+        result = ''
+        if (
+                (ignore_attempts or self.count_attempts > 0) and
+                (not self._word_count_valid())
+        ):
+            result = ungettext(
+                "Invalid Word Count. Your response must be "
+                "between {min} and {max} word.",
+                "Invalid Word Count. Your response must be "
+                "between {min} and {max} words.",
+                self.max_word_count,
+            ).format(
+                min=self.min_word_count,
+                max=self.max_word_count,
+            )
+        return result
+
+    # CSS Classes
+    def _get_indicator_class(self):
+        """
+        Returns the class of the correctness indicator element
+        """
+        result = 'unanswered'
+        if self.display_correctness and self._word_count_valid():
+            if self._determine_credit() == Credit.zero:
+                result = 'incorrect'
+            else:
+                result = 'correct'
+        return result
+
+    def _get_indicator_visibility_class(self):
+        """
+        Returns the visibility class for the correctness indicator html element
+        """
+        if self.display_correctness:
+            result = ''
+        else:
+            result = 'hidden'
+        return result
+
+    def _get_submitdisplay_class(self):
+        """
+        Returns the css class for the submit and save buttons
+        """
+        result = ''
+        if self.max_attempts > 0 and self.count_attempts >= self.max_attempts:
+            result = 'nodisplay'
+        return result
+
+    def _get_hintdisplay_class(self):
+        """
+        Returns the css class for the hint button
+        """
+        result = 'nodisplay'
+        if 0 < len(self.hints):
+            result = ''
+        return result
+
+    # Default View
+    @classmethod
+    def _get_resource_string(cls, path):
+        """
+        Retrieve string contents for the file path
+        """
+        path = os.path.join('public', path)
+        resource_string = pkg_resources.resource_string(__name__, path)
+        return resource_string.decode('utf8')
+
+    def _get_resource_url(self, path):
+        """
+        Retrieve a public URL for the file path
+        """
+        path = os.path.join('public', path)
+        resource_url = self.runtime.local_resource_url(self, path)
+        return resource_url
+
+    def student_view(self, context=None):
+        # pylint: disable=unused-argument
+        """
+        Build the fragment for the default student view
+        """
+        html = self._get_resource_string('view.html')
+        frag = Fragment(
+            html.format(
+                self=self,
+                # Message/Labels
+                problem_progress=self._get_problem_progress(),
+                used_attempts_feedback=self._get_used_attempts_feedback(),
+                submitted_message='',
+                feedback_label='',
+                feedback_text='',
+                hint_text='',
+                user_alert='',
+                # CSS Classes
+                indicator_class=self._get_indicator_class(),
+                visibility_class=self._get_indicator_visibility_class(),
+                submitdisplay_class=self._get_submitdisplay_class(),
+                hintdisplay_class=self._get_hintdisplay_class(),
+                # Feedback display class?
+            )
+        )
+        frag.add_css_url(self._get_resource_url("view.less.min.css"))
+        frag.add_javascript_url(self._get_resource_url("view.js.min.js"))
+        frag.initialize_js('FreeTextResponseView')
+        return frag
+
+    # Handlers to perform actions
     @XBlock.json_handler
     def submit(self, data, suffix=''):
         # pylint: disable=unused-argument
         """
         Processes the user's submission
         """
+        feedback_label = ''
+        feedback_text = ''
         if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
             self.student_answer = data['student_answer']
+            # Answers that do not meet min/max word count specifications
+            # or are blank submissions(since default word count is one)
+            # are not considered for scoring.
             if self._word_count_valid():
-                if self.max_attempts == 0:
-                    self.count_attempts = 1
-                else:
-                    self.count_attempts += 1
+                self.count_attempts += 1
                 self._compute_score()
+                # Find feedback it exists for the answer
+                (feedback_label, feedback_text) = self._get_feedback()
         result = {
             'status': 'success',
+            # Message/Labels
             'problem_progress': self._get_problem_progress(),
-            'indicator_class': self._get_indicator_class(),
             'used_attempts_feedback': self._get_used_attempts_feedback(),
-            'nodisplay_class': self._get_nodisplay_class(),
-            'submitted_message': self._get_submitted_message(),
+            'submitted_message': self._get_submitted_message(
+                feedback_text,
+            ),
+            'feedback_label': feedback_label,
+            'feedback_text': feedback_text,
             'user_alert': self._get_user_alert(
                 ignore_attempts=True,
             ),
+            # CSS Classes
+            'indicator_class': self._get_indicator_class(),
             'visibility_class': self._get_indicator_visibility_class(),
+            'submitdisplay_class': self._get_submitdisplay_class(),
         }
         return result
 
     @XBlock.json_handler
-    def save_reponse(self, data, suffix=''):
+    def save_response(self, data, suffix=''):
         # pylint: disable=unused-argument
         """
         Processes the user's save
@@ -550,23 +644,129 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             self.student_answer = data['student_answer']
         result = {
             'status': 'success',
-            'problem_progress': self._get_problem_progress(),
-            'indicator_class': self._get_indicator_class(),
-            'used_attempts_feedback': self._get_used_attempts_feedback(),
-            'nodisplay_class': self._get_nodisplay_class(),
+            # Message/Labels
+            # Clear this message on save
             'submitted_message': '',
             'user_alert': self.saved_message,
+            # CSS Classes
             'visibility_class': self._get_indicator_visibility_class(),
+            'submitdisplay_class': self._get_submitdisplay_class(),
         }
         return result
 
+    @XBlock.json_handler
+    def hint_reponse(self, data, suffix=''):
+        # pylint: disable=unused-argument
+        """
+        Returns a hint message if it exists
+        does not
+        """
+        result = {
+            'status': 'success',
+            'hint_text': self._get_hint_text(),
+        }
+        return result
 
-class Credit(Enum):
-    # pylint: disable=too-few-public-methods
-    """
-    An enumeration of the different types of credit a submission can be
-    awareded: Zero Credit, Half Credit, and Full Credit
-    """
-    zero = 0.0
-    half = 0.5
-    full = 1.0
+    # Workbench
+    @staticmethod
+    def workbench_scenarios():
+        """
+        Gather scenarios to be displayed in the workbench
+        """
+        scenarios = [
+            ('Free-text Response XBlock',
+             '''<sequence_demo>
+                    <freetextresponse
+                        display_name="Hints and Feedback"
+                        prompt="Which U.S. state has the largest land area?"
+                        max_attempts="20"
+                        weight="2"
+                        fullcredit_keyphrases="[
+                            {
+                                'phrase':'Alaska',
+                                'feedback':'Alaska is 576,400 square miles,
+                                    more than double the land area of the
+                                    second largest state, Texas.'
+                            },
+                            {
+                                'phrase':'The Last Frontier',
+                                'feedback':'Alaska, a.k.a. The Last Frontier,
+                                    is 576,400 square miles, more than double
+                                    the land area of the second largest state,
+                                    Texas.'
+                            }
+
+                        ]"
+                        halfcredit_keyphrases="[
+                            {
+                                'phrase':'Texas',
+                                'feedback':'While many people think Texas is
+                                    the largest state, it is actually the
+                                    second largest, with 261,797 square miles.'
+                            },
+                            {
+                                'phrase':'The Lone Star State',
+                                'feedback':'While many people think Texas,
+                                    a.k.a. The Lone Star State,  is the largest
+                                    state, it is actually the second largest,
+                                    with 261,797 square miles.'
+                            },
+                            {
+                                'phrase':'Pizza',
+                            },
+                            'Tacos'
+                        ]"
+                        zerocredit_keyphrases="[
+                            {
+                                'phrase':'California',
+                                'feedback':'California is the third largest
+                                    state, with 155,959 square miles.'
+                            },
+                            {
+                                'phrase':'Pittsburgh',
+                                'feedback':'Pittsburgh is not a state.'
+                            }
+                        ]"
+                        hints="[
+                            'Consider the square miles, not population.',
+                            'Consider all 50 states, not just the continental
+                                United States.'
+                        ]"
+                    />
+                    <freetextresponse />
+                    <freetextresponse
+                        display_name="Full Credit is
+                            'The quick brown fox',
+                            half is 'The slow wet begal'"
+                        fullcredit_keyphrases="['The quick brown fox']"
+                        halfcredit_keyphrases="['The slow wet begal']"
+                    />
+                    <freetextresponse
+                        display_name="Min words 2"
+                        min_word_count="2"
+                    />
+                    <freetextresponse
+                        display_name="Max Attempts 5 XBlock"
+                        max_attempts="5"
+                    />
+                    <freetextresponse
+                        display_name="Full credit is asdf, Max Attempts 3"
+                        max_attempts="3"
+                        fullcredit_keyphrases="['asdf']"
+                    />
+                    <freetextresponse
+                        display_name="New submitted message"
+                        submitted_message="Different message"
+                    />
+                    <freetextresponse
+                        display_name="Blank submitted message"
+                        submitted_message=""
+                    />
+                    <freetextresponse
+                        display_name="Display correctness if off"
+                        display_correctness="False"
+                    />
+                </sequence_demo>
+             '''),
+        ]
+        return scenarios
