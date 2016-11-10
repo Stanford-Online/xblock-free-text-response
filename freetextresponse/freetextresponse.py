@@ -236,19 +236,14 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         Validates settings entered by the instructor.
         """
-        if data.weight < 0:
-            msg = FreeTextResponse._generate_validation_message(
-                'Weight Attempts cannot be negative'
-            )
-            validation.add(msg)
         if data.max_attempts < 0:
             msg = FreeTextResponse._generate_validation_message(
                 'Maximum Attempts cannot be negative'
             )
             validation.add(msg)
-        if data.max_word_count < 0:
+        if data.weight < 0:
             msg = FreeTextResponse._generate_validation_message(
-                'Maximum Word Count cannot be negative'
+                'Weight Attempts cannot be negative'
             )
             validation.add(msg)
         if data.min_word_count < 1:
@@ -258,7 +253,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             validation.add(msg)
         if data.min_word_count > data.max_word_count:
             msg = FreeTextResponse._generate_validation_message(
-                'Minimum Word Count cannot be greater than Max Word Count'
+                'Maximum Word Count must be greater then Minimum Word Count'
             )
             validation.add(msg)
         if not data.submitted_message:
@@ -287,6 +282,21 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         )
 
     @classmethod
+    def _get_phrases(cls, phrase_dict):
+        """
+        Pull phrases from list elements
+        """
+        phrase_list = []
+        for item in phrase_dict:
+            if 'dict' == type(item).__name__:
+                phrase = item.get('phrase', None)
+                if phrase:
+                    phrase_list.append(phrase)
+            else:
+                phrase_list.append(item)
+        return phrase_list
+
+    @classmethod
     def _is_at_least_one_phrase_present(cls, phrases, answer):
         """
         Determines if at least one of the supplied phrases is
@@ -306,32 +316,23 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = None
         # Get phrases
-        fullcredit_keyphrases = []
-        for item in self.fullcredit_keyphrases:
-            if 'dict' == type(item).__name__:
-                phrase = item.get('phrase', self.fullcredit_keyphrases)
-                fullcredit_keyphrases.append(phrase)
-            else:
-                fullcredit_keyphrases.append(item)
-        halfcredit_keyphrases = []
-        for item in self.halfcredit_keyphrases:
-            if 'dict' == type(item).__name__:
-                phrase = item.get('phrase', self.halfcredit_keyphrases)
-                halfcredit_keyphrases.append(phrase)
-            else:
-                halfcredit_keyphrases.append(item)
+        full_list = FreeTextResponse._get_phrases(self.fullcredit_keyphrases)
+        half_list = FreeTextResponse._get_phrases(self.halfcredit_keyphrases)
         # Determine Credit
         if not self.fullcredit_keyphrases \
                 and not self.halfcredit_keyphrases:
             # No full or half credit answers specified
-            result = Credit.full
+            if self.student_answer:
+                result = Credit.full
+            else:
+                result = Credit.zero
         elif FreeTextResponse._is_at_least_one_phrase_present(
-                fullcredit_keyphrases,
+                full_list,
                 self.student_answer
         ):
             result = Credit.full
         elif FreeTextResponse._is_at_least_one_phrase_present(
-                halfcredit_keyphrases,
+                half_list,
                 self.student_answer
         ):
             result = Credit.half
@@ -371,7 +372,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
         else:
             scaled_score = self.score * self.weight
-            score_string = '{0:g}'.format(scaled_score)
+            # No trailing zero and no scientific notation
+            score_string = ('%.15f' % scaled_score).rstrip('0').rstrip('.')
             result = "({})".format(
                 ungettext(
                     "{score_string}/{weight} point",
@@ -532,6 +534,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     def _get_submitdisplay_class(self):
         """
         Returns the css class for the submit and save buttons
+        Has a Test
         """
         result = ''
         if self.max_attempts > 0 and self.count_attempts >= self.max_attempts:
@@ -587,7 +590,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 visibility_class=self._get_indicator_visibility_class(),
                 submitdisplay_class=self._get_submitdisplay_class(),
                 hintdisplay_class=self._get_hintdisplay_class(),
-                # Feedback display class?
             )
         )
         frag.add_css_url(self._get_resource_url("view.less.min.css"))
@@ -695,7 +697,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                                     the land area of the second largest state,
                                     Texas.'
                             }
-
                         ]"
                         halfcredit_keyphrases="[
                             {

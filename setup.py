@@ -1,11 +1,36 @@
+import os
+from setuptools import setup
+from setuptools.command.test import test as TestCommand
+
 import json
-import setuptools
 
 
 package_json_file = open('package.json', 'r')
 package_json = json.load(package_json_file)
 
-setuptools.setup(
+class Tox(TestCommand):
+    user_options = [('tox-args=', 'a', 'Arguments to pass to tox')]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.tox_args = None
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # import here, cause outside the eggs aren't loaded
+        import tox
+        import shlex
+        args = self.tox_args
+        if args:
+            args = shlex.split(self.tox_args)
+        errno = tox.cmdline(args=args)
+        sys.exit(errno)
+
+setup(
     name=package_json.get('name', 'xblock-test'),
     version=package_json.get('version', '0.1.1'),
     description=package_json.get('description'),
@@ -18,7 +43,16 @@ setuptools.setup(
         'freetextresponse',
     ],
     install_requires=[
+        'django',
+        'django_nose',
+        'mock',
+        'coverage',
+        'mako',
         'XBlock',
+        'xblock-utils',
+    ],
+    dependency_links=[
+        'https://github.com/edx/xblock-utils/tarball/c39bf653e4f27fb3798662ef64cde99f57603f79#egg=xblock-utils',
     ],
     entry_points={
         'xblock.v1': [
