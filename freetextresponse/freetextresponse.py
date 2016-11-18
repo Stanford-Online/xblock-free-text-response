@@ -217,6 +217,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         view_html = FreeTextResponse.get_resource_string('view.html')
         view_html = view_html.format(
             self=self,
+            word_count_message=self._get_word_count_message(),
             indicator_class=self._get_indicator_class(),
             problem_progress=self._get_problem_progress(),
             used_attempts_feedback=self._get_used_attempts_feedback(),
@@ -341,22 +342,33 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
     def _get_word_count_message(self, ignore_attempts=False):
         """
-        Returns the word count message based on the student's answer
+        Returns the word count message
+        """
+        result = ungettext(
+            "Your response must be "
+            "between {min} and {max} word.",
+            "Your response must be "
+            "between {min} and {max} words.",
+            self.max_word_count,
+        ).format(
+            min=self.min_word_count,
+            max=self.max_word_count,
+        )
+        return result
+
+    def _get_invalid_word_count_message(self, ignore_attempts=False):
+        """
+        Returns the invalid word count message
         """
         result = ''
         if (
                 (ignore_attempts or self.count_attempts > 0) and
                 (not self._word_count_valid())
         ):
-            result = ungettext(
-                "Invalid Word Count. Your response must be "
-                "between {min} and {max} word.",
-                "Invalid Word Count. Your response must be "
-                "between {min} and {max} words.",
-                self.max_word_count,
+            word_count_message = self._get_word_count_message(ignore_attempts=ignore_attempts)
+            result = _("Invalid Word Count. {word_count_message}"
             ).format(
-                min=self.min_word_count,
-                max=self.max_word_count,
+                word_count_message=word_count_message,
             )
         return result
 
@@ -510,11 +522,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
     def _get_user_alert(self, ignore_attempts=False):
         """
-        Returns the message to display in the user_alert(TBD) div
+        Returns the message to display in the user_alert div
+        depending on the student answer
         """
         result = ''
         if not self._word_count_valid():
-            result = self._get_word_count_message(ignore_attempts)
+            result = self._get_invalid_word_count_message(ignore_attempts)
         return result
 
     @XBlock.json_handler
