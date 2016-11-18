@@ -1,0 +1,22 @@
+{
+    "empty_zero_max": {
+        "max_attempts": 0,
+        "count_attempts": 1, 
+        "result": ""
+    },
+    "empty_under_max": {
+        "max_attempts": 3,
+        "count_attempts": 2, 
+        "result": ""
+    },
+    "nodisplay_at_max": {
+        "max_attempts": 3,
+        "count_attempts": 3, 
+        "result": "nodisplay"
+    },
+    "nodisplay_over_max": {
+        "max_attempts": 3,
+        "count_attempts": 4, 
+        "result": "nodisplay"
+    }
+}

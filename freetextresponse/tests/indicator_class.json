@@ -1,0 +1,32 @@
+{
+    "unanswered_word_invalid": {
+        "display_correctness": true,
+        "word_count_valid": false, 
+        "credit": null, 
+        "result": "unanswered"
+    },
+    "unanswered_word_valid": {
+        "display_correctness": true,
+        "word_count_valid": false, 
+        "credit": null, 
+        "result": "unanswered"
+    },
+    "incorrect_zero_credit": {
+        "display_correctness": true,
+        "word_count_valid": true, 
+        "credit": "zero", 
+        "result": "incorrect"
+    },
+    "correct_half_credit": {
+        "display_correctness": true,
+        "word_count_valid": true, 
+        "credit": "half", 
+        "result": "correct"
+    },
+    "correct_full_credit": {
+        "display_correctness": true,
+        "word_count_valid": true, 
+        "credit": "full", 
+        "result": "correct"
+    }
+}

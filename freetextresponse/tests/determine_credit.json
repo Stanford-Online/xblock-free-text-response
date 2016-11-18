@@ -1,0 +1,75 @@
+{
+    "zero_empty_answer": {
+        "word_count_valid": true,
+        "fullcredit": [
+            "full answer one", 
+            "full answer two"
+        ], 
+        "halfcredit": [
+            "half answer one", 
+            "half answer two"
+        ], 
+        "student_answer": "",
+        "credit": "zero"
+    },
+    "zero_invalid_word_count": {
+        "word_count_valid": false,
+        "fullcredit": [
+            "full answer one", 
+            "full answer two"
+        ], 
+        "halfcredit": [
+            "half answer one", 
+            "half answer two"
+        ], 
+        "student_answer": "full answer one",
+        "credit": "zero"
+    },
+    "zero_wrong_answer": {
+        "word_count_valid": true,
+        "fullcredit": [
+            "full answer one", 
+            "full answer two"
+        ], 
+        "halfcredit": [
+            "half answer one", 
+            "half answer two"
+        ], 
+        "student_answer": "double answer one",
+        "credit": "zero"
+    },
+    "full_no_phrases": {
+        "word_count_valid": true,
+        "fullcredit": [], 
+        "halfcredit": [], 
+        "student_answer": "any thing will do",
+        "credit": "full"
+    },
+    "full_right_answer": {
+        "word_count_valid": true,
+        "fullcredit": [
+            "full answer one", 
+            "full answer two"
+        ], 
+        "halfcredit": [
+            "half answer one", 
+            "half answer two"
+        ], 
+        "student_answer": "full answer two",
+        "credit": "full"
+    },
+    "half_right_answer": {
+        "word_count_valid": true,
+        "fullcredit": [
+            "full answer one", 
+            "full answer two"
+        ], 
+        "halfcredit": [
+            "half answer one", 
+            "half answer two"
+        ], 
+        "student_answer": "half answer two",
+        "credit": "half"
+    }
+}
+

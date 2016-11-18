@@ -1,26 +1,52 @@
 """
-Module Placeholder Docstring
+Module To Test FreeTextResponse XBlock
 """
+import json
 import unittest
-
-from django.test.client import Client
-from django.utils.translation import ugettext as _
+import ddt
 
 from mock import MagicMock, Mock
 
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
 from xblock.field_data import DictFieldData
+from xblock.validation import ValidationMessage
 
 from .freetextresponse import Credit
 from .freetextresponse import FreeTextResponse
 
+from .utils import _
 
+
+class TestData(object):
+    # pylint: disable=too-few-public-methods
+    """
+    Module helper for validate_field_data
+    """
+    weight = 0
+    max_attempts = 0
+    max_word_count = 0
+    min_word_count = 0
+    submitted_message = None
+
+
+class TestRequest(object):
+    # pylint: disable=too-few-public-methods
+    """
+    Module helper for @json_handler
+    """
+    method = None
+    body = None
+    success = None
+
+
+@ddt.ddt
 class FreetextResponseXblockTestCase(unittest.TestCase):
     # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """
     A complete suite of unit tests for the Free-text Response XBlock
     """
+
     @classmethod
     def make_an_xblock(cls, **kw):
         """
@@ -35,61 +61,163 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         return xblock
 
     def setUp(self):
+        """
+        Creates an xblock
+        """
         self.xblock = FreetextResponseXblockTestCase.make_an_xblock()
-        self.client = Client()
-        self.test_display_name = 'test_display_name',
-        self.test_prompt = 'test_prompt'
-        self.test_weight = 5
-        self.test_max_attempts = 10
-        self.test_display_correctness = 'True'
-        self.test_min_word_count = 5
-        self.test_max_word_count = 10
-        self.test_fullcredit_keyphrases = 'test fullcredit phrase 1, ' \
-                                          'test fullcredit phrase 2'
-        self.test_halfcredit_keyphrases = 'test halfcredit phrase 1, ' \
-                                          'test halfcredit phrase 2'
-        self.test_student_answer = 'test student answer'
-        self.test_count_attempts = '3'
-        self.test_submitted_message = 'test submission received message'
 
-    def test_student_view(self):
+    def test_workbench_scenarios(self):
+        """
+        Checks workbench scenarios title and basic scenario
+        """
+        result_title = 'Free-text Response XBlock'
+        basic_scenario = "<freetextresponse />"
+        test_result = self.xblock.workbench_scenarios()
+        self.assertEquals(result_title, test_result[0][0])
+        self.assertIn(basic_scenario, test_result[0][1])
+
+    def test_generate_validation_message(self):
+        # pylint: disable=invalid-name, protected-access
+        """
+        Checks classmethod _generate_validation_message
+        """
+        msg = u'weight attempts cannot be negative'
+        result = ValidationMessage(
+            ValidationMessage.ERROR,
+            _(msg)
+        )
+        test_result = FreeTextResponse._generate_validation_message(msg)
+        self.assertEquals(
+            type(result),
+            type(test_result),
+        )
+        self.assertEquals(
+            result.text,
+            test_result.text,
+        )
+
+    @ddt.file_data('./tests/validate_field_data.json')
+    def test_validate_field_data(self, **test_dict):
+        """
+        Checks classmethod validate_field_data
+        tests the instuctor values set in edit
+        """
+        test_data = TestData()
+        test_data.weight = test_dict['weight']
+        test_data.max_attempts = test_dict['max_attempts']
+        test_data.max_word_count = test_dict['max_word_count']
+        test_data.min_word_count = test_dict['min_word_count']
+        test_data.submitted_message = test_dict['submitted_message']
+        validation = set()
+        self.xblock.validate_field_data(validation, test_data)
+        validation_list = list(validation)
+        # Only one validation error should be in set
+        self.assertEquals(1, len(validation_list))
+        self.assertEquals(
+            test_dict['result'],
+            validation_list[0].text,
+        )
+
+    def test_get_resource_string(self):
         # pylint: disable=protected-access
         """
-        Checks the student view for student specific instance variables.
+        Checks that get_resource_string returns the proper html
         """
-        student_view_html = self.student_view_html()
-        self.assertIn(self.xblock.display_name, student_view_html)
-        self.assertIn(self.xblock.prompt, student_view_html)
-        self.assertIn(self.xblock._get_indicator_class(), student_view_html)
-        self.assertIn(self.xblock._get_problem_progress(), student_view_html)
+        student_view_html = self.xblock.student_view().content
+        test_result = FreeTextResponse.get_resource_string('view.html')
+        test_result = test_result.format(
+            self=self.xblock,
+            word_count_message=self.xblock._get_word_count_message(),
+            indicator_class=self.xblock._get_indicator_class(),
+            problem_progress=self.xblock._get_problem_progress(),
+            used_attempts_feedback=self.xblock._get_used_attempts_feedback(),
+            nodisplay_class=self.xblock._get_nodisplay_class(),
+            visibility_class=self.xblock._get_indicator_visibility_class(),
+            submitted_message='',
+            user_alert='',
+        )
+        self.assertEquals(student_view_html, test_result)
 
-    def test_studio_view(self):
+    @ddt.data('view.js.min.js', 'view.less.min.css')
+    def test_get_resource_url(self, path):
         """
-        Checks studio view for instance variables specified by the instructor.
+        Checks that get_resource_url the correct url
         """
-        studio_view_html = self.studio_view_html()
-        self.assertIn(self.xblock.display_name, studio_view_html)
-        self.assertIn(self.xblock.prompt, studio_view_html)
-        self.assertIn(str(self.xblock.max_attempts), studio_view_html)
-        self.assertIn(str(self.xblock.display_correctness), studio_view_html)
-        self.assertIn(str(self.xblock.min_word_count), studio_view_html)
-        self.assertIn(str(self.xblock.max_word_count), studio_view_html)
-        self.assertIn(
-            ', '.join(
-                self.xblock.fullcredit_keyphrases,
-            ),
-            studio_view_html,
+        public_path = '/resource/freetextresponse/public'
+        result = "{public_path}/{path}".format(
+            public_path=public_path,
+            path=path,
         )
-        self.assertIn(
-            ', '.join(
-                self.xblock.halfcredit_keyphrases,
-            ),
-            studio_view_html,
+        self.xblock.runtime.local_resource_url = MagicMock(
+            return_value=result
         )
+        test_result = self.xblock.get_resource_url(path)
+        self.assertEquals(result, test_result)
+
+    def test_build_fragment(self):
+        # pylint: disable=protected-access
+        """
+        Checks build_fragment content and added resources
+        """
+        # Get content
+        student_view = self.xblock.student_view()
+        student_view_html = student_view.content
+        # Build fragment
+        view_html = FreeTextResponse.get_resource_string('view.html')
+        view_html = view_html.format(
+            self=self.xblock,
+            word_count_message=self.xblock._get_word_count_message(),
+            indicator_class=self.xblock._get_indicator_class(),
+            problem_progress=self.xblock._get_problem_progress(),
+            used_attempts_feedback=self.xblock._get_used_attempts_feedback(),
+            nodisplay_class=self.xblock._get_nodisplay_class(),
+            visibility_class=self.xblock._get_indicator_visibility_class(),
+            submitted_message='',
+            user_alert='',
+        )
+        public_path = '/resource/freetextresponse/public'
+        css_path = "{public_path}/{path}".format(
+            public_path=public_path,
+            path='view.less.min.css',
+        )
+        path_js = "{public_path}/{path}".format(
+            public_path=public_path,
+            path='view.js.min.js',
+        )
+        css_url = "{public_path}/{path}".format(
+            public_path=public_path,
+            path='some.fake.css',
+        )
+        js_url = "{public_path}/{path}".format(
+            public_path=public_path,
+            path='some.fake.js',
+        )
+        self.xblock.runtime.local_resource_url = MagicMock()
+        # Called once for each path
+        self.xblock.runtime.local_resource_url.side_effect = [
+            css_path,
+            path_js
+        ]
+        test_result = self.xblock.build_fragment(
+            html_source=view_html,
+            paths_css=[css_path],
+            paths_js=[path_js],
+            urls_css=[css_url],
+            urls_js=[js_url],
+            fragment_js='FreeTextResponseView',
+        )
+        self.assertEqual(student_view_html, test_result.content)
+        test_result_resource_names = []
+        for resource in test_result.resources:
+            test_result_resource_names.append(resource.data)
+        self.assertIn(css_path, test_result_resource_names)
+        self.assertIn(path_js, test_result_resource_names)
+        self.assertIn(css_url, test_result_resource_names)
+        self.assertIn(js_url, test_result_resource_names)
 
     def test_initialization_variables(self):
         """
-        Checks that all instance variables are initialized correctly
+        Checks that instance variables are initialized correctly
         """
         self.assertEquals('Free-text Response', self.xblock.display_name)
         self.assertEquals(
@@ -112,467 +240,412 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         self.assertEquals('', self.xblock.student_answer)
         self.assertEquals(0, self.xblock.count_attempts)
 
-    def student_view_html(self):
+    # Default Views
+    def test_student_view(self):
+        # pylint: disable=protected-access
         """
-        Helper method that returns the html of student_view
+        Checks the student view for student specific instance variables.
         """
-        return self.xblock.student_view().content
+        student_view = self.xblock.student_view()
+        student_view_html = student_view.content
+        self.assertIn(self.xblock.display_name, student_view_html)
+        self.assertIn(self.xblock.prompt, student_view_html)
 
-    def studio_view_html(self):
-        """
-        Helper method that returns the html of studio_view
-        """
-        return self.xblock.studio_view(context=None).content
-
-    def test_word_count_message_blank_when_attempts_0(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the word count message is blank when the
-        user has made zero attempts
-        """
-        self.xblock.count_attempts = 0
-        self.assertEquals(
-            '',
-            self.xblock._get_word_count_message(),
+        self.assertIn(self.xblock._get_word_count_message(), student_view_html)
+        self.assertIn(self.xblock._get_indicator_class(), student_view_html)
+        self.assertIn(self.xblock._get_problem_progress(), student_view_html)
+        self.assertIn(
+            self.xblock._get_used_attempts_feedback(),
+            student_view_html
+        )
+        self.assertIn(self.xblock._get_nodisplay_class(), student_view_html)
+        self.assertIn(
+            self.xblock._get_indicator_visibility_class(),
+            student_view_html
         )
 
-    def test_word_count_message_not_blank_when_attempts_0(self):
-        # pylint: disable=invalid-name, protected-access
+    def test_studio_view(self):
         """
-        Tests that the word count message is blank when the
-        user has made zero attempts
+        Checks studio view for instance variables specified by the instructor.
         """
-        self.xblock.count_attempts = 0
+        studio_view_html = self.xblock.studio_view(context=None).content
+        self.assertIn(self.xblock.display_name, studio_view_html)
+        self.assertIn(self.xblock.prompt, studio_view_html)
+        self.assertIn(str(self.xblock.weight), studio_view_html)
+        self.assertIn(str(self.xblock.max_attempts), studio_view_html)
+        self.assertIn(str(self.xblock.display_correctness), studio_view_html)
+        self.assertIn(str(self.xblock.min_word_count), studio_view_html)
+        self.assertIn(str(self.xblock.max_word_count), studio_view_html)
         self.assertIn(
-            _('Invalid Word Count. Your response must be between'),
-            self.xblock._get_word_count_message(
-                ignore_attempts=True,
+            ', '.join(
+                self.xblock.fullcredit_keyphrases,
             ),
+            studio_view_html,
         )
-
-    def test_word_count_message_blank_when_word_count_valid(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the word count message doesn't display when
-        the word count is valid
-        """
-        self.xblock.count_attempts = 5
-        self.xblock._word_count_valid = MagicMock(return_value=True)
-        self.assertEquals(
-            '',
-            self.xblock._get_word_count_message()
-        )
-
-    def test_invalid_word_count_message(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the invalid word count message displays
-        when appropriate
-        """
-        count_attempts = 5
-        self.xblock._word_count_valid = MagicMock(return_value=False)
         self.assertIn(
-            _('Invalid Word Count. Your response must be between'),
-            self.xblock._get_word_count_message(count_attempts)
+            ', '.join(
+                self.xblock.halfcredit_keyphrases,
+            ),
+            studio_view_html,
+        )
+        self.assertIn(str(self.xblock.submitted_message), studio_view_html)
+
+    # Scoring
+    @ddt.file_data('./tests/determine_credit.json')
+    def test_determine_credit(self, **test_data):
+        # pylint: disable=protected-access
+        """
+        Tests determine_credit
+        After a student response this function will
+        return the Credit enum full, half, or zero
+        """
+        self.xblock._word_count_valid = MagicMock(
+            return_value=test_data['word_count_valid']
+        )
+        self.xblock.fullcredit_keyphrases = test_data['fullcredit']
+        self.xblock.halfcredit_keyphrases = test_data['halfcredit']
+        self.xblock.student_answer = test_data['student_answer']
+        credit = Credit[test_data['credit']]
+        self.assertEquals(credit, self.xblock._determine_credit())
+
+    @ddt.data(Credit.zero, Credit.half, Credit.full)
+    def test_compute_score(self, credit):
+        # pylint: disable=protected-access
+        """
+        Tests _compute_score
+        After a student response this function will
+        set the xblock score and publish the grade
+        """
+        self.xblock.runtime.publish = MagicMock(return_value=None)
+        self.xblock._determine_credit = MagicMock(return_value=credit)
+        self.xblock._compute_score()
+        self.xblock.runtime.publish.assert_called_with(
+            self.xblock,
+            'grade',
+            {'value': credit.value, 'max_value': Credit.full.value},
         )
 
-    def test_indicator_class_unanswered(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the 'unanswered' class for the display_correctness
-        html component displays when appropriate
-        """
-        self.xblock.student_answer = ''
-        self.xblock.count_attempts = 0
-        self.assertEquals('unanswered', self.xblock._get_indicator_class())
-
-    def test_indicator_class_incorrect_blank_response(self):
+    def test_is_at_least_one_phrase_present(self):
         # pylint: disable=invalid-name, protected-access
         """
-        Tests that the 'incorrect' class for the display_correctness html
-        component displays when the response is blank
+        Tests _is_at_least_one_phrase_present
+        Helper method to match student response
+        with given phrase list
         """
-        self.xblock.student_answer = ''
-        self.xblock.count_attempts = 5
-        self.assertEquals('incorrect', self.xblock._get_indicator_class())
-
-    def test_indicator_class_incorrect_normal_response(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the 'incorrect' class for the display_correctness
-        html component displays when the response is incorrect
-        """
-        self.xblock.student_answer = 'Non-blank response'
-        self.xblock.count_attempts = 5
-        self.xblock._word_count_valid = MagicMock(return_value=False)
-        original = FreeTextResponse._is_at_least_one_phrase_present
-        FreeTextResponse._is_at_least_one_phrase_present = \
-            MagicMock(return_value=False)
-        self.assertEquals('incorrect', self.xblock._get_indicator_class())
-        FreeTextResponse._is_at_least_one_phrase_present = original
-
-    def test_indicator_class_correct_normal_response(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the 'correct' class for the display_correctness html
-        component displays when the response is correct
-        """
-        self.xblock.student_answer = 'Non-blank response'
-        self.xblock.count_attempts = 5
-        self.xblock._word_count_valid = MagicMock(return_value=True)
-        original = FreeTextResponse._is_at_least_one_phrase_present
-        FreeTextResponse._is_at_least_one_phrase_present = \
-            MagicMock(return_value=True)
-        self.assertEquals('correct', self.xblock._get_indicator_class())
-        FreeTextResponse._is_at_least_one_phrase_present = original
-
-    def test_word_count_in_range(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the word_count_valid method returns the
-        appropriate response when the word count is valid
-        """
-        self.xblock.student_answer = 'One two three'
-        self.xblock.min_word_count = 1
-        self.xblock.max_word_count = 5
-        self.assertTrue(self.xblock._word_count_valid())
-
-    def test_word_count_min(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the word_count_valid method returns the
-        appropriate response when the student's answer has
-        the minimum number of permissible words
-        """
-        self.xblock.student_answer = 'One two three'
-        self.xblock.min_word_count = 3
-        self.xblock.max_word_count = 5
-        self.assertTrue(self.xblock._word_count_valid())
-
-    def test_word_count_max(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the word_count_valid method returns the
-        appropriate response when the student's answer has
-        the maximum number of permissible words
-        """
-        self.xblock.student_answer = 'One two three'
-        self.xblock.min_word_count = 0
-        self.xblock.max_word_count = 3
-        self.assertTrue(self.xblock._word_count_valid())
-
-    def test_word_count_too_short(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the word_count_valid method returns the
-        appropriate response when the student's answer
-        is too short
-        """
-        self.xblock.student_answer = 'One two three'
-        self.xblock.min_word_count = 4
-        self.xblock.max_word_count = 5
-        self.assertFalse(self.xblock._word_count_valid())
-
-    def test_word_count_too_long(self):
-        # pylint: disable=protected-access
-        """
-        Tests that the word_count_valid method returns the
-        appropriate response when the student's answer
-        is too long
-        """
-        self.xblock.student_answer = 'One two three'
-        self.xblock.min_word_count = 0
-        self.xblock.max_word_count = 2
-        self.assertFalse(self.xblock._word_count_valid())
-
-    def test_phrase_present_in_answer(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests the phrase_present_in_answer helper method, when at least
-        of of the phrases is present in the answer
-        """
-        phrases = ["Battle Ends", "And", "Down", "Goes", "Charles' Father"]
-        answer = "chArles' fAther"
+        keyphrases_list = [
+            'do dict phrase',
+            're dict phrase',
+            'mi dict phrase',
+            'fa dict phrase'
+        ]
+        answer = keyphrases_list[1]
+        answer = 'ajhsdfhjaefhaf ' + answer + 'jkfbaufebn;  fuqv'
         self.assertTrue(
             FreeTextResponse._is_at_least_one_phrase_present(
-                phrases,
+                keyphrases_list,
                 answer,
             ),
         )
 
-    def test_pattern_not_present_in_answer(self):
+    def test_not_is_at_least_one_phrase_present(self):
         # pylint: disable=invalid-name, protected-access
         """
-        Tests the phrase_present_in_answer helper method, when none of the
-        phrases are present in the anaswer
+        Tests _is_at_least_one_phrase_present
+        Helper method to match student response
+        with given phrase list
         """
-        phrases = ["Battle Ends", "And", "Down", "Goes", "Charles' Father"]
-        answer = "cHarleS' mother went to the store to buy honey"
+        keyphrases_list = [
+            'do dict phrase',
+            're dict phrase',
+            'mi dict phrase',
+            'fa dict phrase'
+        ]
+        answer = 'so dict phrase'
+        answer = 'ajhsdfhjaefhaf ' + answer + 'jkfbaufebn;  fuqv'
         self.assertFalse(
             FreeTextResponse._is_at_least_one_phrase_present(
-                phrases,
+                keyphrases_list,
                 answer,
             ),
         )
 
-    def test_problem_progress_weight_zero(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the the string returned by get_problem_progress
-        is blank when the weight of the problem is zero
-        """
-        self.xblock.score = 1
-        self.xblock.weight = 0
-        self.assertEquals('', self.xblock._get_problem_progress())
-
-    def test_problem_progress_score_zero_weight_singular(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the the string returned by get_problem_progress
-        when the weight of the problem is singular, and the score is zero
-        """
-        self.xblock.score = 0
-        self.xblock.weight = 1
-        self.assertEquals(
-            _('(1 point possible)'),
-            self.xblock._get_problem_progress(),
-        )
-
-    def test_problem_progress_score_zero_weight_plural(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the the string returned by get_problem_progress
-        when the weight of the problem is plural, and the score is zero
-        """
-        self.xblock.score = 0
-        self.xblock.weight = 3
-        self.assertEquals(
-            _('(3 points possible)'),
-            self.xblock._get_problem_progress(),
-        )
-
-    def test_problem_progress_score_positive_weight_singular(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the the string returned by get_problem_progress
-        when the weight of the problem is singular, and the score is positive
-        """
-        self.xblock.score = 1
-        self.xblock.weight = 1
-        self.assertEquals(
-            _('(1/1 point)'),
-            self.xblock._get_problem_progress(),
-        )
-
-    def test_problem_progress_score_positive_weight_plural(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the the string returned by get_problem_progress
-        when the weight of the problem is plural, and the score is positive
-        """
-        self.xblock.score = 1
-        self.xblock.weight = 3
-        self.assertEquals(
-            _('(3/3 points)'),
-            self.xblock._get_problem_progress(),
-        )
-
-    def test_compute_score_full_credit(self):
+    @ddt.file_data('./tests/word_count_valid.json')
+    def test_word_count_valid(self, **test_data):
         # pylint: disable=protected-access
         """
-        Tests that a full-credit grade is assigned when appropriate
+        Tests _word_count_valid
+        After a student response this will
+        determine if the response meets word
+        count criteria
         """
-        def get_full_credit():
-            """
-            Side-effect that returns full credit
-            """
-            return Credit.full
-        self.xblock.runtime.publish = MagicMock(return_value=None)
-        self.xblock._determine_credit = MagicMock(side_effect=get_full_credit)
-        self.xblock._compute_score()
-        self.xblock.runtime.publish.assert_called_with(
-            self.xblock,
-            'grade',
-            {'value': Credit.full.value, 'max_value': Credit.full.value},
-        )
+        self.xblock.min_word_count = test_data['min_word_count']
+        self.xblock.max_word_count = test_data['max_word_count']
+        self.xblock.student_answer = test_data['student_answer']
+        self.assertEquals(test_data['result'], self.xblock._word_count_valid())
 
-    def test_compute_score_half_credit(self):
-        # pylint: disable=protected-access
-        """
-        Tests that a half-credit grade is assigned when appropriate
-        """
-        def get_half_credit():
-            """
-            Side-effect that returns half credit
-            """
-            return Credit.half
-        self.xblock.runtime.publish = MagicMock(return_value=None)
-        self.xblock._determine_credit = MagicMock(side_effect=get_half_credit)
-        self.xblock._compute_score()
-        self.xblock.runtime.publish.assert_called_with(
-            self.xblock,
-            'grade',
-            {'value': Credit.half.value, 'max_value': Credit.full.value},
-        )
-
-    def test_compute_score_no_credit(self):
-        # pylint: disable=protected-access
-        """
-        Tests that a no-credit grade is assigned when appropriate
-        """
-        def get_no_credit():
-            """
-            Side-effect that returns no credit
-            """
-            return Credit.zero
-        self.xblock.runtime.publish = MagicMock(return_value=None)
-        self.xblock._determine_credit = MagicMock(side_effect=get_no_credit)
-        self.xblock._compute_score()
-        self.xblock.runtime.publish.assert_called_with(
-            self.xblock,
-            'grade',
-            {'value': Credit.zero.value, 'max_value': Credit.full.value},
-        )
-
-    def test_indicator_visibility_class_blank(self):
+    # Messages
+    @ddt.data(
+        # max_attempts, count_attempts, result
+        (0, 4, ''),
+        (1, 0, 'You have used 0 of 1 submission'),
+        (3, 2, 'You have used 2 of 3 submissions'),
+    )
+    @ddt.unpack
+    def test_used_attempts_feedback_normal(
+            self,
+            max_attempts,
+            count_attempts,
+            result
+    ):
         # pylint: disable=invalid-name, protected-access
         """
-        Tests that the get_indicator_visibility_class helper
-        returns a blank class when appropriate
+        Tests get_used_attempts_feedback
+        Returns the used attempts feedback message
+        after a student response
         """
-        self.xblock.display_correctness = True
+        self.xblock.max_attempts = max_attempts
+        self.xblock.count_attempts = count_attempts
         self.assertEquals(
-            '',
-            self.xblock._get_indicator_visiblity_class(),
-        )
-
-    def test_indicator_visibility_class_hidden(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that the get_indicator_visibility_class helper
-        returns 'hidden' class when appropriate
-        """
-        self.xblock.display_correctness = False
-        self.assertEquals(
-            'hidden',
-            self.xblock._get_indicator_visiblity_class(),
-        )
-
-    def test_determine_zero_credit_blank_answer(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Placeholder Docstring
-        """
-        self.xblock.student_answer = ''
-        self.xblock._word_count_valid = MagicMock(return_value=False)
-        self.assertEquals(Credit.zero, self.xblock._determine_credit())
-
-    def test_determine_zero_credit_normal_answer(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that determine_credit() returns zero-credit when appropriate
-        """
-        self.xblock.student_answer = 'Non-blank answer'
-        self.xblock.fullcredit_keyphrases = ['Something else']
-        self.xblock.halfcredit_keyphrases = ['Something else']
-        self.xblock._word_count_valid = MagicMock(return_value=True)
-        self.assertEquals(Credit.zero, self.xblock._determine_credit())
-
-    def test_determine_half_credit(self):
-        # pylint: disable=protected-access
-        """
-        Tests that determine_credit() returns half-credit when appropriate
-        """
-        self.xblock.student_answer = 'Non-blank answer'
-        self.xblock._word_count_valid = MagicMock(return_value=True)
-        self.xblock.fullcredit_keyphrases = ['Something else']
-        self.xblock.halfcredit_keyphrases = ['Non-blank', 'answer']
-        self.assertEquals(Credit.half, self.xblock._determine_credit())
-
-    def test_determine_full_credit(self):
-        # pylint: disable=protected-access
-        """
-        Tests that determine_credit() returns full-credit when appropriate
-        """
-        self.xblock.student_answer = 'Non-blank answer'
-        self.xblock._word_count_valid = MagicMock(return_value=True)
-        self.xblock.fullcredit_keyphrases = 'Non-blank, answer'
-        self.xblock.halfcredit_keyphrases = 'Something else'
-        self.assertEquals(Credit.full, self.xblock._determine_credit())
-
-    def test_used_attempts_feedback_blank(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that get_used_attempts_feedback returns no feedback when
-        appropriate
-        """
-        self.xblock.max_attempts = 0
-        self.assertEquals('', self.xblock._get_used_attempts_feedback())
-
-    def test_used_attempts_feedback_normal(self):
-        # pylint: disable=invalid-name, protected-access
-        """
-        Tests that get_used_attempts_feedback returns the expected feedback
-        """
-        self.xblock.max_attempts = 5
-        self.xblock.count_attempts = 3
-        self.assertEquals(
-            _('You have used 3 of 5 submissions'),
+            _(result),
             self.xblock._get_used_attempts_feedback(),
         )
 
-    def test_submit_class_blank(self):
+    @ddt.data(
+        # min_word_count, max_word_count, result
+        (0, 1, 'Your response must be between 0 and 1 word.'),
+        (2, 3, 'Your response must be between 2 and 3 words.'),
+    )
+    @ddt.unpack
+    def test_get_word_count_message(
+            self,
+            min_word_count,
+            max_word_count,
+            result,
+    ):
         # pylint: disable=protected-access
         """
-        Tests that get_submit_class returns a blank value when appropriate
+        Tests _get_word_count_message
+        Returns the word count message
+        based on instructor set word count
+        min and max
         """
-        self.xblock.max_attempts = 0
-        self.assertEquals('', self.xblock._get_submit_class())
-
-    def test_submit_class_nodisplay(self):
-        # pylint: disable=protected-access
-        """
-        Tests that get_submit_class returns the appropriate class
-        when the number of attempts has exceeded the maximum number of
-        permissable attempts
-        """
-        self.xblock.max_attempts = 5
-        self.xblock.count_attempts = 6
-        self.assertEquals('nodisplay', self.xblock._get_submit_class())
-
-    def test_sm_blank_zero_attempts(self):
-        # pylint: disable=protected-access, invalid-name
-        """
-        Tests that _get_submitted_message returns an empty string
-        when the user has made 0 attempts
-        """
-        self.xblock.count_attempts = 0
-        self.xblock.submitted_message = self.test_submitted_message
-        self.assertEquals('', self.xblock._get_submitted_message())
-
-    def test_sm_blank_word_count_invalid(self):
-        # pylint: disable=protected-access, invalid-name
-        """
-        Tests that _get_submitted_message returns an empty string
-        when the word count is not valid, but the user has made
-        at least one attempt
-        """
-        self.xblock.count_attempts = 2
-        self.xblock.submitted_message = self.test_submitted_message
-        self.xblock._word_count_valid = MagicMock(return_value=False)
-        self.assertEquals('', self.xblock._get_submitted_message())
-
-    def test_srm_nonblank(self):
-        # pylint: disable=protected-access
-        """
-        Tests that _get_submitted_message returns the designated
-        message when the word count is valid and the user has made
-        at least one attempt
-        """
-        self.xblock.count_attempts = 2
-        self.xblock.submitted_message = self.test_submitted_message
-        self.xblock._word_count_valid = MagicMock(return_value=True)
+        self.xblock.min_word_count = min_word_count
+        self.xblock.max_word_count = max_word_count
         self.assertEquals(
-            self.test_submitted_message,
+            _(result),
+            self.xblock._get_word_count_message(),
+        )
+
+    # Tested from get_user_alert
+    @ddt.file_data('./tests/invalid_word_count_message.json')
+    def test_get_user_alert(self, **test_data):
+        # pylint: disable=protected-access
+        """
+        Tests _get_user_alert
+        if the word count is invalid this will
+        return the invalid word count message
+        """
+        self.xblock._word_count_valid = MagicMock(
+            return_value=test_data['word_count_valid']
+        )
+        self.xblock.count_attempts = test_data['count_attempts']
+        self.xblock.min_word_count = test_data['min_word_count']
+        self.xblock.max_word_count = test_data['max_word_count']
+        self.assertEquals(
+            _(str(test_data['result'])),
+            self.xblock._get_user_alert(
+                ignore_attempts=test_data['ignore_attempts']
+            ),
+        )
+
+    @ddt.data(
+        # word_count_valid, result
+        (False, ''),
+        (True, 'test submission received message'),
+    )
+    @ddt.unpack
+    def test_get_submitted_message(
+            self,
+            word_count_valid,
+            result
+    ):
+        # pylint: disable=protected-access
+        """
+        Tests _get_submitted_message
+        Returns a message to display to
+        the user after they submit a
+        resopnse
+        """
+        self.xblock._word_count_valid = MagicMock(
+            return_value=word_count_valid
+        )
+        self.xblock.submitted_message = 'test submission received message'
+        self.assertEquals(
+            _(result),
             self.xblock._get_submitted_message(),
+        )
+
+    @ddt.file_data('./tests/problem_progress.json')
+    def test_get_problem_progress(self, **test_data):
+        # pylint: disable=protected-access
+        """
+        Tests _get_problem_progress
+        Score can be 0, 0.5, or 1
+        Return a message for current
+        problem progress
+        """
+        self.xblock.weight = test_data['weight']
+        self.xblock.score = test_data['score']
+        self.assertEquals(
+            _(test_data['result']),
+            self.xblock._get_problem_progress(),
+        )
+
+    # CSS Classes
+    @ddt.file_data('./tests/indicator_class.json')
+    def test_get_indicator_class(self, **test_data):
+        # pylint: disable=protected-access
+        """
+        Test _get_indicator_class
+        Returns the correctness CCS class
+        to show correct/incorrect/unanswered
+        UI
+        """
+        credit = None
+        if test_data['credit']:
+            credit = Credit[test_data['credit']]
+        self.xblock.display_correctness = test_data['display_correctness']
+        self.xblock._word_count_valid = MagicMock(
+            return_value=test_data['word_count_valid']
+        )
+        self.xblock._determine_credit = MagicMock(return_value=credit)
+        self.assertEquals(
+            test_data['result'],
+            self.xblock._get_indicator_class()
+        )
+
+    @ddt.data(
+        # display_correctness, result
+        (True, ''),
+        (False, 'hidden'),
+    )
+    @ddt.unpack
+    def test_get_indicator_visibility_class(self, display_correctness, result):
+        # pylint: disable=invalid-name, protected-access
+        """
+        Tests _get_indicator_visibility_class
+        Return hidden or blank CCS class to
+        hide correctness UI
+        """
+        self.xblock.display_correctness = display_correctness
+        self.assertEquals(
+            result,
+            self.xblock._get_indicator_visibility_class(),
+        )
+
+    @ddt.file_data('./tests/submitdisplay_class.json')
+    def test_get_submitdisplay_class(self, **test_data):
+        # pylint: disable=protected-access
+        """
+        Tests _get_submitdisplay_class
+        Return blank or nodisplay CCS class
+        that hide the submit buttons after
+        a user has reached max_attempts
+        """
+        self.xblock.max_attempts = test_data['max_attempts']
+        self.xblock.count_attempts = test_data['count_attempts']
+        self.assertEquals(
+            test_data['result'],
+            self.xblock._get_nodisplay_class()
+        )
+
+    def test_submit(self):
+        # pylint: disable=protected-access
+        """
+        Tests save_reponse results
+        """
+        data = json.dumps({'student_answer': 'asdf'})
+        request = TestRequest()
+        request.method = 'POST'
+        request.body = data
+        response = self.xblock.submit(request)
+        # Added for response json_body
+        # pylint: disable=no-member
+        self.assertEquals(
+            response.json_body['status'],
+            'success'
+        )
+        self.assertEquals(
+            response.json_body['problem_progress'],
+            self.xblock._get_problem_progress()
+        )
+        self.assertEquals(
+            response.json_body['indicator_class'],
+            self.xblock._get_indicator_class()
+        )
+        self.assertEquals(
+            response.json_body['used_attempts_feedback'],
+            self.xblock._get_used_attempts_feedback()
+        )
+        self.assertEquals(
+            response.json_body['nodisplay_class'],
+            self.xblock._get_nodisplay_class()
+        )
+        self.assertEquals(
+            response.json_body['submitted_message'],
+            self.xblock._get_submitted_message()
+        )
+        self.assertEquals(
+            response.json_body['user_alert'],
+            self.xblock._get_user_alert(
+                ignore_attempts=True,
+            )
+        )
+        self.assertEquals(
+            response.json_body['visibility_class'],
+            self.xblock._get_indicator_visibility_class()
+        )
+
+    def test_save_reponse(self):
+        # pylint: disable=protected-access
+        """
+        Tests save_reponse results
+        """
+        data = json.dumps({'student_answer': 'asdf'})
+        request = TestRequest()
+        request.method = 'POST'
+        request.body = data
+        response = self.xblock.save_reponse(request)
+        # Added for response json_body
+        # pylint: disable=no-member
+        self.assertEquals(
+            response.json_body['status'],
+            'success'
+        )
+        self.assertEquals(
+            response.json_body['problem_progress'],
+            self.xblock._get_problem_progress()
+        )
+        self.assertIsNone(
+            response.json_body.get('indicator_class', None),
+        )
+        self.assertEquals(
+            response.json_body['used_attempts_feedback'],
+            self.xblock._get_used_attempts_feedback()
+        )
+        self.assertEquals(
+            response.json_body['nodisplay_class'],
+            self.xblock._get_nodisplay_class()
+        )
+        self.assertEquals(
+            response.json_body['submitted_message'],
+            ''
+        )
+        self.assertEquals(
+            response.json_body['user_alert'],
+            self.xblock.saved_message
+        )
+        self.assertEquals(
+            response.json_body['visibility_class'],
+            self.xblock._get_indicator_visibility_class()
         )

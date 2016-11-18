@@ -5,7 +5,6 @@ This is the core logic for the Free-text Response XBlock
 import os
 
 import pkg_resources
-from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
 from enum import Enum
 from xblock.core import XBlock
@@ -36,10 +35,14 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             ('Free-text Response XBlock',
              '''<sequence_demo>
                     <freetextresponse />
+                    <freetextresponse name='My First XBlock' />
                     <freetextresponse
                         display_name="Full Credit is asdf, half is fdsa"
                         fullcredit_keyphrases="['asdf']"
                         halfcredit_keyphrases="['fdsa']"
+                        min_word_count="2"
+                        max_word_count="2"
+                        max_attempts="5"
                     />
                     <freetextresponse
                         display_name="Min words 2"
@@ -52,6 +55,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                     <freetextresponse
                         display_name="Full credit is asdf, Max Attempts 3"
                         max_attempts="3"
+                        min_word_count="2"
                         fullcredit_keyphrases="['asdf']"
                     />
                     <freetextresponse
@@ -246,7 +250,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = ValidationMessage(
             ValidationMessage.ERROR,
-            _(msg)
+            _(unicode(msg))
         )
         return result
 
@@ -262,11 +266,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         if data.max_attempts < 0:
             msg = FreeTextResponse._generate_validation_message(
                 'Maximum Attempts cannot be negative'
-            )
-            validation.add(msg)
-        if data.max_word_count < 0:
-            msg = FreeTextResponse._generate_validation_message(
-                'Maximum Word Count cannot be negative'
             )
             validation.add(msg)
         if data.min_word_count < 1:
@@ -340,7 +339,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             result = 'hidden'
         return result
 
-    def _get_word_count_message(self, ignore_attempts=False):
+    def _get_word_count_message(self):
         """
         Returns the word count message
         """
@@ -365,8 +364,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 (ignore_attempts or self.count_attempts > 0) and
                 (not self._word_count_valid())
         ):
-            word_count_message = self._get_word_count_message(ignore_attempts=ignore_attempts)
-            result = _("Invalid Word Count. {word_count_message}"
+            word_count_message = self._get_word_count_message()
+            result = _(
+                "Invalid Word Count. {word_count_message}"
             ).format(
                 word_count_message=word_count_message,
             )
@@ -428,7 +428,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
         else:
             scaled_score = self.score * self.weight
-            score_string = '{0:g}'.format(scaled_score)
+            # No trailing zero and no scientific notation
+            score_string = ('%.15f' % scaled_score).rstrip('0').rstrip('.')
             result = "({})".format(
                 ungettext(
                     "{score_string}/{weight} point",
@@ -540,9 +541,10 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         # down on the previous sumbisson
         if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
             self.student_answer = data['student_answer']
-            if self._word_count_valid():
-                self.count_attempts += 1
-                self._compute_score()
+            # Counting the attempts and publishing a score
+            # even if word count is invalid.
+            self.count_attempts += 1
+            self._compute_score()
         result = {
             'status': 'success',
             'problem_progress': self._get_problem_progress(),
@@ -570,7 +572,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         result = {
             'status': 'success',
             'problem_progress': self._get_problem_progress(),
-            'indicator_class': self._get_indicator_class(),
             'used_attempts_feedback': self._get_used_attempts_feedback(),
             'nodisplay_class': self._get_nodisplay_class(),
             'submitted_message': '',

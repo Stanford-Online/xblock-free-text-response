@@ -1,0 +1,52 @@
+{
+    "no_weight_zero_score": {
+        "weight": 0,
+        "score": 0, 
+        "result": ""
+    },
+    "one_weight_zero_score": {
+        "weight": 1,
+        "score": 0, 
+        "result": "(1 point possible)"
+    },
+    "one_weight_zero_score": {
+        "weight": 1,
+        "score": 1, 
+        "result": "(1/1 point)"
+    },
+    "plural_weight_zero_score": {
+        "weight": 5,
+        "score": 0, 
+        "result": "(5 points possible)"
+    },
+    "plural_weight_half_score": {
+        "weight": 5,
+        "score": 0.5, 
+        "result": "(2.5/5 points)"
+    },
+    "plural_weight_full_score": {
+        "weight": 5,
+        "score": 1, 
+        "result": "(5/5 points)"
+    },
+    "large_even_weight_zero_score": {
+        "weight": 975312468,
+        "score": 0, 
+        "result": "(975312468 points possible)"
+    },
+    "large_even_weight_half_score": {
+        "weight": 975312468,
+        "score": 0.5, 
+        "result": "(487656234/975312468 points)"
+    },
+    "large_even_weight_half_score": {
+        "weight": 975312468,
+        "score": 1, 
+        "result": "(975312468/975312468 points)"
+    },
+    "large_odd_weight_half_score": {
+        "weight": 7919,
+        "score": 0.5, 
+        "result": "(3959.5/7919 points)"
+    }
+}

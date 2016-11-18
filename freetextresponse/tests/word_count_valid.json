@@ -1,0 +1,38 @@
+{
+    "blank_answer": {
+        "min_word_count": 1,
+        "max_word_count": 2, 
+        "student_answer": "", 
+        "result": false
+    },
+    "min_answer": {
+        "min_word_count": 1,
+        "max_word_count": 2, 
+        "student_answer": "One", 
+        "result": true
+    },
+    "max_answer": {
+        "min_word_count": 1,
+        "max_word_count": 2, 
+        "student_answer": "One Two", 
+        "result": true
+    },
+    "too_long_answer": {
+        "min_word_count": 2,
+        "max_word_count": 4, 
+        "student_answer": "One Two Three Four Five", 
+        "result": false
+    },
+    "too_short_answer": {
+        "min_word_count": 2,
+        "max_word_count": 4, 
+        "student_answer": "One", 
+        "result": false
+    },
+    "in_range_answer": {
+        "min_word_count": 3,
+        "max_word_count": 6, 
+        "student_answer": "One Two Three Four Five", 
+        "result": true 
+    }
+}
