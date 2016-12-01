@@ -407,6 +407,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         )
 
     def _determine_credit(self):
+        # pylint: disable=redefined-variable-type
         """
         Helper Method that determines the level of credit that
         the user should earn based on their answer

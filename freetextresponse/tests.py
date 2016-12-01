@@ -36,7 +36,6 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         return xblock
 
     def setUp(self):
-        # pylint: disable=super-method-not-called
         self.xblock = FreetextResponseXblockTestCase.make_an_xblock()
         self.client = Client()
         self.test_display_name = 'test_display_name',
