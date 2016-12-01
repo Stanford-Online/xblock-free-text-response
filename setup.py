@@ -2,8 +2,6 @@ import json
 import setuptools
 from setuptools.command.test import test as TestCommand
 
-package_json_file = open('package.json', 'r')
-package_json = json.load(package_json_file)
 
 class Tox(TestCommand):
     user_options = [('tox-args=', 'a', 'Arguments to pass to tox')]
@@ -28,13 +26,9 @@ class Tox(TestCommand):
         sys.exit(errno)
 
 setuptools.setup(
-    name=package_json.get('name', 'xblock-test'),
-    version=package_json.get('version', '0.1.1'),
-    description=package_json.get('description'),
-    long_description=package_json.get('description'),
-    author=package_json.get('author', {}).get('name'),
-    author_email=package_json.get('author', {}).get('email'),
-    url=package_json.get('homepage'),
+    name="xblock-free-text-response",
+    version="0.1.1",
+    description="Enables instructors to create questions with free-text responses.",
     license='AGPL-3.0',
     packages=[
         'freetextresponse',
@@ -47,6 +41,7 @@ setuptools.setup(
         'mako',
         'XBlock',
         'xblock-utils',
+        'enum34',
     ],
     dependency_links=[
         'https://github.com/edx/xblock-utils/tarball/c39bf653e4f27fb3798662ef64cde99f57603f79#egg=xblock-utils',
