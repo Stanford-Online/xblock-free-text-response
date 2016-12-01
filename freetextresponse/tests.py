@@ -3,11 +3,14 @@ Module Placeholder Docstring
 """
 import unittest
 
-import mock
 from django.test.client import Client
 from django.utils.translation import ugettext as _
+
+import mock
 from mock import MagicMock
+
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
+
 from xblock.field_data import DictFieldData
 
 from .freetextresponse import Credit

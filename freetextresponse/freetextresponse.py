@@ -19,6 +19,8 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
+from .utils import _
+
 
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
