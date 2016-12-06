@@ -407,6 +407,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         )
 
     def _determine_credit(self):
+        #  Not a standard xlbock pylint disable.
+        # This is a problem with pylint 'enums and R0204 in general'
         # pylint: disable=redefined-variable-type
         """
         Helper Method that determines the level of credit that

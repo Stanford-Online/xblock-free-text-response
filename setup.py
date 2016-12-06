@@ -1,5 +1,5 @@
 import json
-import setuptools
+from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
 
@@ -25,7 +25,7 @@ class Tox(TestCommand):
         errno = tox.cmdline(args=args)
         sys.exit(errno)
 
-setuptools.setup(
+setup(
     name="xblock-free-text-response",
     version="0.1.1",
     description="Enables instructors to create questions with free-text responses.",

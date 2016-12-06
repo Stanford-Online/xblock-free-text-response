@@ -6,8 +6,7 @@ import unittest
 from django.test.client import Client
 from django.utils.translation import ugettext as _
 
-import mock
-from mock import MagicMock
+from mock import MagicMock, Mock
 
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
@@ -28,8 +27,8 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         Helper method that creates a Free-text Response XBlock
         """
         course_id = SlashSeparatedCourseKey('foo', 'bar', 'baz')
-        runtime = mock.Mock(course_id=course_id)
-        scope_ids = mock.Mock()
+        runtime = Mock(course_id=course_id)
+        scope_ids = Mock()
         field_data = DictFieldData(kw)
         xblock = FreeTextResponse(runtime, field_data, scope_ids)
         xblock.xmodule_runtime = runtime
