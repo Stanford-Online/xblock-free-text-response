@@ -3,11 +3,13 @@ Module Placeholder Docstring
 """
 import unittest
 
-import mock
 from django.test.client import Client
 from django.utils.translation import ugettext as _
-from mock import MagicMock
+
+from mock import MagicMock, Mock
+
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
+
 from xblock.field_data import DictFieldData
 
 from .freetextresponse import Credit
@@ -25,15 +27,14 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         Helper method that creates a Free-text Response XBlock
         """
         course_id = SlashSeparatedCourseKey('foo', 'bar', 'baz')
-        runtime = mock.Mock(course_id=course_id)
-        scope_ids = mock.Mock()
+        runtime = Mock(course_id=course_id)
+        scope_ids = Mock()
         field_data = DictFieldData(kw)
         xblock = FreeTextResponse(runtime, field_data, scope_ids)
         xblock.xmodule_runtime = runtime
         return xblock
 
     def setUp(self):
-        # pylint: disable=super-method-not-called
         self.xblock = FreetextResponseXblockTestCase.make_an_xblock()
         self.client = Client()
         self.test_display_name = 'test_display_name',

@@ -19,6 +19,8 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
+from .utils import _
+
 
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
@@ -405,6 +407,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         )
 
     def _determine_credit(self):
+        #  Not a standard xlbock pylint disable.
+        # This is a problem with pylint 'enums and R0204 in general'
+        # pylint: disable=redefined-variable-type
         """
         Helper Method that determines the level of credit that
         the user should earn based on their answer
