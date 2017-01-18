@@ -1,8 +1,8 @@
 .freetextresponse {
 
-  .user-input {
+  .user_input {
 
-    .status{
+    .status {
       margin-left: 10px;
       display: inline-block;
     }
@@ -24,12 +24,39 @@
       height: 20px;
       background: url("images/incorrect-icon.png") center center no-repeat;
     }
+
+    .student_answer {
+      height:150px;
+      box-sizing:border-box;
+      border-radius:3px;
+      border:2px solid #e4e4e4;
+      min-width:160px;
+    }
+
+    &.unanswered .student_answer {
+      border:2px solid #e4e4e4;
+    }
+
+    &.correct .student_answer {
+      border:2px solid #1e9348;
+    }
+
+    &.incorrect .student_answer {
+      border:2px solid #b20610;
+    }
+
   }
 
   @dark_grey: #666;
 
   .action {
     margin-top: 20px;
+
+    .save {
+      height: 40px;
+      vertical-align: middle;
+      font-weight: 600;
+    }
 
     .check {
       height: 40px;
@@ -58,6 +85,14 @@
     font-size: 1em;
   }
 
+  .word-count-message {
+    display: inline-block;
+    padding-left: 5px;
+    color: @dark_grey;
+    font-weight: 100;
+    font-size: 1em;
+  }
+
   .hidden{
     visibility: hidden;
   }
@@ -66,11 +101,14 @@
     display: inline-block;
   }
 
-  .word-count-error {
-    color: #A50000;
+  .capa_alert {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border: 1px solid #ebe8bf;
+    border-radius: 3px;
+    background: #fffcdd;
+    font-size: 0.9em;
   }
 
-  .submission-received {
-    color: #2EA41E;
-  }
+  div:empty { display: none }
 }

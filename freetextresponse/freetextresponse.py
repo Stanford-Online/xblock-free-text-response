@@ -5,7 +5,6 @@ This is the core logic for the Free-text Response XBlock
 import os
 
 import pkg_resources
-from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
 from enum import Enum
 from xblock.core import XBlock
@@ -37,6 +36,40 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
              '''<sequence_demo>
                     <freetextresponse />
                     <freetextresponse name='My First XBlock' />
+                    <freetextresponse
+                        display_name="Full Credit is asdf, half is fdsa"
+                        fullcredit_keyphrases="['asdf']"
+                        halfcredit_keyphrases="['fdsa']"
+                        min_word_count="2"
+                        max_word_count="2"
+                        max_attempts="5"
+                    />
+                    <freetextresponse
+                        display_name="Min words 2"
+                        min_word_count="2"
+                    />
+                    <freetextresponse
+                        display_name="Max Attempts 5 XBlock"
+                        max_attempts="5"
+                    />
+                    <freetextresponse
+                        display_name="Full credit is asdf, Max Attempts 3"
+                        max_attempts="3"
+                        min_word_count="2"
+                        fullcredit_keyphrases="['asdf']"
+                    />
+                    <freetextresponse
+                        display_name="New submitted message"
+                        submitted_message="Different message"
+                    />
+                    <freetextresponse
+                        display_name="Blank submitted message"
+                        submitted_message=""
+                    />
+                    <freetextresponse
+                        display_name="Display correctness if off"
+                        display_correctness="False"
+                    />
                 </sequence_demo>
              '''),
         ]
@@ -118,6 +151,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         ),
         default=_('Please enter your response within this text area'),
         scope=Scope.settings,
+        multiline_editor=True,
     )
     submitted_message = String(
         display_name=_('Submission Received Message'),
@@ -136,6 +170,18 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         ),
         default=0,
         values={'min': 1},
+        scope=Scope.settings,
+    )
+    saved_message = String(
+        display_name=_('Draft Received Message'),
+        help=_(
+            'This is the message students will see upon '
+            'submitting a draft response'
+        ),
+        default=_(
+            'Your answers have been saved but not graded. '
+            'Click "Submit" to grade them.'
+        ),
         scope=Scope.settings,
     )
 
@@ -175,15 +221,14 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         view_html = FreeTextResponse.get_resource_string('view.html')
         view_html = view_html.format(
             self=self,
+            word_count_message=self._get_word_count_message(),
             indicator_class=self._get_indicator_class(),
             problem_progress=self._get_problem_progress(),
             used_attempts_feedback=self._get_used_attempts_feedback(),
-            submit_class=self._get_submit_class(),
-            indicator_visibility_class=self._get_indicator_visiblity_class(),
-            word_count_message=self._get_word_count_message(
-                self.count_attempts
-            ),
-            submitted_message=self._get_submitted_message(),
+            nodisplay_class=self._get_nodisplay_class(),
+            visibility_class=self._get_indicator_visibility_class(),
+            submitted_message='',
+            user_alert='',
         )
         fragment = self.build_fragment(
             html_source=view_html,
@@ -205,7 +250,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = ValidationMessage(
             ValidationMessage.ERROR,
-            _(msg)
+            _(unicode(msg))
         )
         return result
 
@@ -221,11 +266,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         if data.max_attempts < 0:
             msg = FreeTextResponse._generate_validation_message(
                 'Maximum Attempts cannot be negative'
-            )
-            validation.add(msg)
-        if data.max_word_count < 0:
-            msg = FreeTextResponse._generate_validation_message(
-                'Maximum Word Count cannot be negative'
             )
             validation.add(msg)
         if data.min_word_count < 1:
@@ -289,7 +329,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             fragment.initialize_js(fragment_js)
         return fragment
 
-    def _get_indicator_visiblity_class(self):
+    def _get_indicator_visibility_class(self):
         """
         Returns the visibility class for the correctness indicator html element
         """
@@ -299,24 +339,36 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             result = 'hidden'
         return result
 
-    def _get_word_count_message(self, ignore_attempts=False):
+    def _get_word_count_message(self):
         """
-        Returns the word count message based on the student's answer
+        Returns the word count message
+        """
+        result = ungettext(
+            "Your response must be "
+            "between {min} and {max} word.",
+            "Your response must be "
+            "between {min} and {max} words.",
+            self.max_word_count,
+        ).format(
+            min=self.min_word_count,
+            max=self.max_word_count,
+        )
+        return result
+
+    def _get_invalid_word_count_message(self, ignore_attempts=False):
+        """
+        Returns the invalid word count message
         """
         result = ''
         if (
                 (ignore_attempts or self.count_attempts > 0) and
                 (not self._word_count_valid())
         ):
-            result = ungettext(
-                "Invalid Word Count. Your response must be "
-                "between {min} and {max} word.",
-                "Invalid Word Count. Your response must be "
-                "between {min} and {max} words.",
-                self.max_word_count,
+            word_count_message = self._get_word_count_message()
+            result = _(
+                "Invalid Word Count. {word_count_message}"
             ).format(
-                min=self.min_word_count,
-                max=self.max_word_count,
+                word_count_message=word_count_message,
             )
         return result
 
@@ -324,13 +376,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         Returns the class of the correctness indicator element
         """
-        result = ''
-        if self.count_attempts == 0:
-            result = 'unanswered'
-        elif self._determine_credit() == Credit.zero:
-            result = 'incorrect'
-        else:
-            result = 'correct'
+        result = 'unanswered'
+        if self.display_correctness and self._word_count_valid():
+            if self._determine_credit() == Credit.zero:
+                result = 'incorrect'
+            else:
+                result = 'correct'
         return result
 
     def _word_count_valid(self):
@@ -377,7 +428,8 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
         else:
             scaled_score = self.score * self.weight
-            score_string = '{0:g}'.format(scaled_score)
+            # No trailing zero and no scientific notation
+            score_string = ('%.15f' % scaled_score).rstrip('0').rstrip('.')
             result = "({})".format(
                 ungettext(
                     "{score_string}/{weight} point",
@@ -451,7 +503,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
         return result
 
-    def _get_submit_class(self):
+    def _get_nodisplay_class(self):
         """
         Returns the css class for the submit button
         """
@@ -465,8 +517,18 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         Returns the message to display in the submission-received div
         """
         result = ''
-        if self.count_attempts > 0 and self._word_count_valid():
+        if self._word_count_valid():
             result = self.submitted_message
+        return result
+
+    def _get_user_alert(self, ignore_attempts=False):
+        """
+        Returns the message to display in the user_alert div
+        depending on the student answer
+        """
+        result = ''
+        if not self._word_count_valid():
+            result = self._get_invalid_word_count_message(ignore_attempts)
         return result
 
     @XBlock.json_handler
@@ -475,30 +537,46 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         Processes the user's submission
         """
-        if self.max_attempts > 0 and self.count_attempts >= self.max_attempts:
-            raise StandardError(
-                _(
-                    'User has already exceeded the '
-                    'maximum number of allowed attempts'
-                )
-            )
-        self.student_answer = data['student_answer']
-        if self._word_count_valid():
-            if self.max_attempts == 0:
-                self.count_attempts = 1
-            else:
-                self.count_attempts += 1
+        # Fails if the UI submit/save buttons were shut
+        # down on the previous sumbisson
+        if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
+            self.student_answer = data['student_answer']
+            # Counting the attempts and publishing a score
+            # even if word count is invalid.
+            self.count_attempts += 1
             self._compute_score()
         result = {
             'status': 'success',
             'problem_progress': self._get_problem_progress(),
             'indicator_class': self._get_indicator_class(),
             'used_attempts_feedback': self._get_used_attempts_feedback(),
-            'submit_class': self._get_submit_class(),
-            'word_count_message': self._get_word_count_message(
-                ignore_attempts=True
-            ),
+            'nodisplay_class': self._get_nodisplay_class(),
             'submitted_message': self._get_submitted_message(),
+            'user_alert': self._get_user_alert(
+                ignore_attempts=True,
+            ),
+            'visibility_class': self._get_indicator_visibility_class(),
+        }
+        return result
+
+    @XBlock.json_handler
+    def save_reponse(self, data, suffix=''):
+        # pylint: disable=unused-argument
+        """
+        Processes the user's save
+        """
+        # Fails if the UI submit/save buttons were shut
+        # down on the previous sumbisson
+        if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
+            self.student_answer = data['student_answer']
+        result = {
+            'status': 'success',
+            'problem_progress': self._get_problem_progress(),
+            'used_attempts_feedback': self._get_used_attempts_feedback(),
+            'nodisplay_class': self._get_nodisplay_class(),
+            'submitted_message': '',
+            'user_alert': self.saved_message,
+            'visibility_class': self._get_indicator_visibility_class(),
         }
         return result
 
