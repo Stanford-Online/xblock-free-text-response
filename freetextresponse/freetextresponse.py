@@ -246,6 +246,16 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         )
         return fragment
 
+    def max_score(self):
+        """
+        Returns the configured number of possible points for this component.
+        Arguments:
+            None
+        Returns:
+            float: The number of possible points for this component
+        """
+        return self.weight
+
     @classmethod
     def _generate_validation_message(cls, msg):
         """
