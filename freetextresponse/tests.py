@@ -264,6 +264,14 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             student_view_html
         )
 
+    def test_max_score(self):
+        """
+        Tests max_score function
+        Should return the weight
+        """
+        self.xblock.weight = 4
+        self.assertEquals(self.xblock.weight, self.xblock.max_score())
+
     def test_studio_view(self):
         """
         Checks studio view for instance variables specified by the instructor.
