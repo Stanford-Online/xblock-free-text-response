@@ -1,12 +1,12 @@
 """
 This is the core logic for the Free-text Response XBlock
 """
-
-import os
-
-import pkg_resources
-from django.utils.translation import ungettext
 from enum import Enum
+from django.template.context import Context
+from django.template.loader import get_template
+from django.utils.translation import ungettext
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 from xblock.core import XBlock
 from xblock.fields import Boolean
 from xblock.fields import Float
@@ -18,9 +18,8 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
-from .utils import _
 
-
+@XBlock.needs("i18n")
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
     """
@@ -90,7 +89,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         help=_(
             'This is the title for this question type'
         ),
-        default=_('Free-text Response'),
+        default='Free-text Response',
         scope=Scope.settings,
     )
     fullcredit_keyphrases = List(
@@ -149,7 +148,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'This is the prompt students will see when '
             'asked to enter their response'
         ),
-        default=_('Please enter your response within this text area'),
+        default='Please enter your response within this text area',
         scope=Scope.settings,
         multiline_editor=True,
     )
@@ -159,7 +158,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'This is the message students will see upon '
             'submitting their response'
         ),
-        default=_('Your submission has been received'),
+        default='Your submission has been received',
         scope=Scope.settings,
     )
     weight = Integer(
@@ -178,7 +177,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             'This is the message students will see upon '
             'submitting a draft response'
         ),
-        default=_(
+        default=(
             'Your answers have been saved but not graded. '
             'Click "Submit" to grade them.'
         ),
@@ -211,38 +210,75 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         'fullcredit_keyphrases',
         'halfcredit_keyphrases',
         'submitted_message',
+        'saved_message',
     )
+
+    def build_fragment(
+            self,
+            template,
+            context_dict,
+            initialize_js_func,
+            additional_css=[],
+            additional_js=[],
+    ):
+        #  pylint: disable=dangerous-default-value, too-many-arguments
+        """
+        Creates a fragment for display.
+        """
+        context = Context(context_dict)
+        fragment = Fragment(template.render(context))
+        for item in additional_css:
+            url = self.runtime.local_resource_url(self, item)
+            fragment.add_css_url(url)
+        for item in additional_js:
+            url = self.runtime.local_resource_url(self, item)
+            fragment.add_javascript_url(url)
+        fragment.initialize_js(initialize_js_func)
+        return fragment
 
     # Decorate the view in order to support multiple devices e.g. mobile
     # See: https://openedx.atlassian.net/wiki/display/MA/Course+Blocks+API
     # section 'View @supports(multi_device) decorator'
     @XBlock.supports('multi_device')
-    def student_view(self, context=None):
-        # pylint: disable=unused-argument
+    def student_view(self, context={}):
+        # pylint: disable=dangerous-default-value
+        """The main view of FreeTextResponse, displayed when viewing courses.
+
+        The main view which displays the general layout for FreeTextResponse
+
+        Args:
+            context: Not used for this view.
+
+        Returns:
+            (Fragment): The HTML Fragment for this XBlock, which determines the
+            general frame of the FreeTextResponse Question.
         """
-        Build the fragment for the default student view
-        """
-        view_html = FreeTextResponse.get_resource_string('view.html')
-        view_html = view_html.format(
-            self=self,
-            word_count_message=self._get_word_count_message(),
-            indicator_class=self._get_indicator_class(),
-            problem_progress=self._get_problem_progress(),
-            used_attempts_feedback=self._get_used_attempts_feedback(),
-            nodisplay_class=self._get_nodisplay_class(),
-            visibility_class=self._get_indicator_visibility_class(),
-            submitted_message='',
-            user_alert='',
+
+        self.runtime.service(self, 'i18n')
+        context.update(
+            {
+                'display_name': self.display_name,
+                'indicator_class': self._get_indicator_class(),
+                'nodisplay_class': self._get_nodisplay_class(),
+                'problem_progress': self._get_problem_progress(),
+                'prompt': self.prompt,
+                'student_answer': self.student_answer,
+                'used_attempts_feedback': self._get_used_attempts_feedback(),
+                'visibility_class': self._get_indicator_visibility_class(),
+                'word_count_message': self._get_word_count_message(),
+            }
         )
+        template = get_template('freetextresponse_view.html')
         fragment = self.build_fragment(
-            html_source=view_html,
-            paths_css=[
-                'view.less.min.css',
+            template,
+            context,
+            initialize_js_func='FreeTextResponseView',
+            additional_css=[
+                'public/view.less.min.css',
             ],
-            paths_js=[
-                'view.js.min.js',
+            additional_js=[
+                'public/view.js.min.js',
             ],
-            fragment_js='FreeTextResponseView',
         )
         return fragment
 
@@ -264,7 +300,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = ValidationMessage(
             ValidationMessage.ERROR,
-            _(unicode(msg))
+            ugettext(unicode(msg))
         )
         return result
 
@@ -297,51 +333,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 'Submission Received Message cannot be blank'
             )
             validation.add(msg)
-
-    @classmethod
-    def get_resource_string(cls, path):
-        """
-        Retrieve string contents for the file path
-        """
-        path = os.path.join('public', path)
-        resource_string = pkg_resources.resource_string(__name__, path)
-        return resource_string.decode('utf8')
-
-    def get_resource_url(self, path):
-        """
-        Retrieve a public URL for the file path
-        """
-        path = os.path.join('public', path)
-        resource_url = self.runtime.local_resource_url(self, path)
-        return resource_url
-
-    def build_fragment(
-            self,
-            html_source=None,
-            paths_css=[],
-            paths_js=[],
-            urls_css=[],
-            urls_js=[],
-            fragment_js=None,
-    ):
-        #  pylint: disable=dangerous-default-value, too-many-arguments
-        """
-        Assemble the HTML, JS, and CSS for an XBlock fragment
-        """
-        fragment = Fragment(html_source)
-        for url in urls_css:
-            fragment.add_css_url(url)
-        for path in paths_css:
-            url = self.get_resource_url(path)
-            fragment.add_css_url(url)
-        for url in urls_js:
-            fragment.add_javascript_url(url)
-        for path in paths_js:
-            url = self.get_resource_url(path)
-            fragment.add_javascript_url(url)
-        if fragment_js:
-            fragment.initialize_js(fragment_js)
-        return fragment
 
     def _get_indicator_visibility_class(self):
         """
@@ -379,7 +370,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 (not self._word_count_valid())
         ):
             word_count_message = self._get_word_count_message()
-            result = _(
+            result = ugettext(
                 "Invalid Word Count. {word_count_message}"
             ).format(
                 word_count_message=word_count_message,
@@ -475,7 +466,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     def _determine_credit(self):
         #  Not a standard xlbock pylint disable.
         # This is a problem with pylint 'enums and R0204 in general'
-        # pylint: disable=redefined-variable-type
         """
         Helper Method that determines the level of credit that
         the user should earn based on their answer

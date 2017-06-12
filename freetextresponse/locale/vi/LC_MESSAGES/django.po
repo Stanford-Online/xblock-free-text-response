@@ -1,0 +1,48 @@
+# Vietnamese Translations for Free Text Response Xblock
+# plural translations are copies of the singular version
+
+# Copyright (C) 2017
+# This file is distributed under the same license as the free-text-response package.
+# Hang Pham <hpham3@stanford.edu>, 2017
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1.2\n"
+"Report-Msgid-Bugs-To: mondiaz <mondiaz@stanford.edu>\n"
+"POT-Creation-Date: 2017-06-13 22:13+0000\n"
+"PO-Revision-Date: 2017-06-14 22:13+0000\n"
+"Last-Translator: mondiaz <mondiaz@stanford.edu>, 2017\n"
+"Language-Team: Vietnamese (https://www.transifex.com/stanford-online/teams/22259/vi/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: vi\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: freetextresponse/freetextresponse.py:427
+msgid "Your response must be between {min} and {max} word."
+msgid_plural "Your response must be between {min} and {max} words."
+msgstr[0] "Giới hạn {min}-{max} từ."
+msgstr[1] "Giới hạn {min}-{max} từ."
+
+#: freetextresponse/freetextresponse.py:449
+msgid "Invalid Word Count. {word_count_message}"
+msgstr "Số từ không hợp lệ. {word_count_message}"
+
+#: freetextresponse/freetextresponse.py:502
+msgid "{weight} point possible"
+msgid_plural "{weight} points possible"
+msgstr[0] "" 
+msgstr[1] ""
+
+#: freetextresponse/freetextresponse.py:515
+msgid "{score_string}/{weight} point"
+msgid_plural "{score_string}/{weight} points"
+msgstr[0] ""
+msgstr[1] ""
+
+#: freetextresponse/freetextresponse.py:577
+msgid "You have used {count_attempts} of {max_attempts} submission"
+msgid_plural "You have used {count_attempts} of {max_attempts} submissions"
+msgstr[0] "Bạn đã thử {count_attempts} của {max_attempts} lần"
+msgstr[1] "Bạn đã thử {count_attempts} của {max_attempts} lần"
