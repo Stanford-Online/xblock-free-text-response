@@ -28,7 +28,7 @@ function FreeTextResponseView(runtime, element) {
     }
 
     buttonSubmit.on('click', function () {
-        buttonSubmit.text('Checking...');
+        buttonSubmit.text(buttonSubmit[0].dataset.checking);
         runtime.notify('submit', {
             message: 'Submitting...',
             state: 'start'
@@ -43,7 +43,7 @@ function FreeTextResponseView(runtime, element) {
                 buttonSubmit.addClass(response.nodisplay_class);
                 problemProgress.text(response.problem_progress);
                 submissionReceivedMessage.text(response.submitted_message);
-                buttonSubmit.text('Submit');
+                buttonSubmit.text(buttonSubmit[0].dataset.value);
                 userAlertMessage.text(response.user_alert);
                 buttonSave.addClass(response.nodisplay_class);
                 setClassForTextAreaParent(response.indicator_class); 
@@ -60,7 +60,7 @@ function FreeTextResponseView(runtime, element) {
     });
 
     buttonSave.on('click', function () {
-        buttonSave.text('Checking...');
+        buttonSave.text(buttonSave[0].dataset.checking);
         runtime.notify('save', {
             message: 'Saving...',
             state: 'start'
@@ -76,7 +76,7 @@ function FreeTextResponseView(runtime, element) {
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
                 problemProgress.text(response.problem_progress);
                 submissionReceivedMessage.text(response.submitted_message);
-                buttonSave.text('Save');
+                buttonSave.text(buttonSave[0].dataset.value);
                 userAlertMessage.text(response.user_alert);
 
                 runtime.notify('save', {

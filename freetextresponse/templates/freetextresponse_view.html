@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="freetextresponse xmodule_display xmodule_CapaModule problem">
+    <h2 class="problem-header">{{ display_name }}</h2>
+    <div class="problem-progress">{{ problem_progress }}</div>
+    <p>{{ prompt }}</p>
+    <div class="word-count-message">{{ word_count_message }}</div>
+    <div class="capa_inputtype textline">
+        <div class="user_input {{ indicator_class }}">
+            <textarea class="student_answer" rows="20">{{ student_answer }}</textarea>
+            <span class="status {{ visibility_class }}" aria-describedby="student_answer"></span>
+        </div>
+    </div>
+    <div class="capa_alert submission-received">{{ submitted_message }}</div>
+    <div class="action">
+        <button class="check Submit {{ nodisplay_class }}" data-checking="{% trans "Checking..." %}" data-value={% trans "Submit" %}>
+            {% trans "Submit" %}
+        </button>
+        <button class="save {{ nodisplay_class }}" data-checking="{% trans "Checking..." %}" data-value={% trans "Save" %}>
+            {% trans "Save" %}
+        </button>
+        <div class="used-attempts-feedback" aria-live="polite">{{ used_attempts_feedback }}</div>
+    </div>
+    <div class="capa_alert user_alert">{{ user_alert }}</div>
+</div>
