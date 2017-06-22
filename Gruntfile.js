@@ -120,7 +120,6 @@ module.exports = function (grunt) {
                     gruntFile,
                     directoryPrivateJsAll,
                     directoryPrivateLessAll,
-                    directoryPrivateHtmlAll,
                 ],
                 tasks: [
                     'default',
