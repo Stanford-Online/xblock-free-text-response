@@ -12,6 +12,8 @@ from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
 
+from django.template.loader import get_template
+
 from .freetextresponse import Credit
 from .freetextresponse import FreeTextResponse
 
@@ -166,6 +168,28 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             self.xblock._get_indicator_visibility_class(),
             student_view_html
         )
+
+    def test_build_fragment_prompt_html(self):
+        """
+        Checks that build_fragment allows html in the prompt variable
+
+        if the 'safe' filter is not used then the django
+        template pipeline returns html tags like,
+            '&lt;p&gt;Please enter your response here&lt;/p&gt;'
+        """
+        studio_settings_prompt = "<p>Please enter your response here</p>"
+        context = {
+            'prompt': studio_settings_prompt,
+        }
+        template = get_template('freetextresponse_view.html')
+        fragment = self.xblock.build_fragment(
+            template,
+            context,
+            initialize_js_func='FreeTextResponseView',
+            additional_css=[],
+            additional_js=[],
+        )
+        self.assertIn(studio_settings_prompt, fragment.content)
 
     def test_max_score(self):
         """
