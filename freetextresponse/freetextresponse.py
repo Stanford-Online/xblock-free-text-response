@@ -2,6 +2,7 @@
 This is the core logic for the Free-text Response XBlock
 """
 from enum import Enum
+from django.db import IntegrityError
 from django.template.context import Context
 from django.template.loader import get_template
 from django.utils.translation import ungettext
@@ -454,14 +455,17 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         credit = self._determine_credit()
         self.score = credit.value
-        self.runtime.publish(
-            self,
-            'grade',
-            {
-                'value': self.score,
-                'max_value': Credit.full.value
-            }
-        )
+        try:
+            self.runtime.publish(
+                self,
+                'grade',
+                {
+                    'value': self.score,
+                    'max_value': Credit.full.value
+                }
+            )
+        except IntegrityError:
+            pass
 
     def _determine_credit(self):
         #  Not a standard xlbock pylint disable.
