@@ -15,6 +15,16 @@ function FreeTextResponseView(runtime, element) {
     var url = runtime.handlerUrl(element, 'submit');
     var urlSave = runtime.handlerUrl(element, 'save_reponse');
 
+    var xblockId = $element.attr('data-usage-id');
+    var cachedAnswerId = xblockId + '_cached_answer';
+    var problemProgressId = xblockId + '_problem_progress';
+    var usedAttemptsFeedbackId = xblockId + '_used_attempts_feedback';
+    if ($('body').data(cachedAnswerId) !== undefined) {
+        textareaStudentAnswer.text($('body').data(cachedAnswerId));
+        problemProgress.text($('body').data(problemProgressId));
+        usedAttemptsFeedback.text($('body').data(usedAttemptsFeedbackId));
+    }
+
     // POLYFILL notify if it does not exist. Like in the xblock workbench.
     runtime.notify = runtime.notify || function () {
         console.log('POLYFILL runtime.notify', arguments);
@@ -47,6 +57,10 @@ function FreeTextResponseView(runtime, element) {
                 userAlertMessage.text(response.user_alert);
                 buttonSave.addClass(response.nodisplay_class);
                 setClassForTextAreaParent(response.indicator_class); 
+
+                $('body').data(cachedAnswerId, $element.find('.student_answer').val());
+                $('body').data(problemProgressId, response.problem_progress);
+                $('body').data(usedAttemptsFeedbackId, response.used_attempts_feedback);
  
                 runtime.notify('submit', {
                     state: 'end'
@@ -78,6 +92,10 @@ function FreeTextResponseView(runtime, element) {
                 submissionReceivedMessage.text(response.submitted_message);
                 buttonSave.text(buttonSave[0].dataset.value);
                 userAlertMessage.text(response.user_alert);
+
+                $('body').data(cachedAnswerId, $element.find('.student_answer').val());
+                $('body').data(problemProgressId, response.problem_progress);
+                $('body').data(usedAttemptsFeedbackId, response.used_attempts_feedback);
 
                 runtime.notify('save', {
                     state: 'end'

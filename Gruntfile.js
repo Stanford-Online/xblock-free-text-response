@@ -74,6 +74,7 @@ module.exports = function (grunt) {
             options: {
                 ignores: [
                 ],
+                reporterOutput: '',
             },
             dist: [
                 gruntFile,
