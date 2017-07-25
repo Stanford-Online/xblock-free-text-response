@@ -12,6 +12,7 @@ from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
 
+from django.db import IntegrityError
 from django.template.loader import get_template
 
 from .freetextresponse import Credit
@@ -259,6 +260,24 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             'grade',
             {'value': credit.value, 'max_value': Credit.full.value},
         )
+
+    def test_compute_score_integrity_error(self):
+        # pylint: disable=protected-access, invalid-name
+        """
+        Tests that _compute_score gracefully handles IntegrityError exception.
+
+        Tests to ensure that if an IntegrityError exception
+        is thrown by any of the methods/functions called in the
+        process of saving the score, the program handles it gracefully.
+        We force runtime.publish to throw an IntegrityError exception,
+        and expect _compute_score to be graceful about it.
+        """
+        self.xblock.runtime.publish = MagicMock(return_value=None)
+        self.xblock.runtime.publish.side_effect = IntegrityError(
+            "Unique Key Violation"
+        )
+        self.xblock._determine_credit = MagicMock(return_value=Credit.zero)
+        self.xblock._compute_score()
 
     def test_is_at_least_one_phrase_present(self):
         # pylint: disable=invalid-name, protected-access
