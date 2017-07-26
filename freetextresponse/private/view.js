@@ -3,6 +3,7 @@ function FreeTextResponseView(runtime, element) {
 
     var $ = window.jQuery;
     var $element = $(element);
+    var $xblocksContainer = $('#seq_content');
     var buttonSubmit = $element.find('.check.Submit');
     var buttonSave = $element.find('.save');
     var usedAttemptsFeedback = $element.find('.action .used-attempts-feedback');
@@ -19,10 +20,10 @@ function FreeTextResponseView(runtime, element) {
     var cachedAnswerId = xblockId + '_cached_answer';
     var problemProgressId = xblockId + '_problem_progress';
     var usedAttemptsFeedbackId = xblockId + '_used_attempts_feedback';
-    if ($('body').data(cachedAnswerId) !== undefined) {
-        textareaStudentAnswer.text($('body').data(cachedAnswerId));
-        problemProgress.text($('body').data(problemProgressId));
-        usedAttemptsFeedback.text($('body').data(usedAttemptsFeedbackId));
+    if ($xblocksContainer.data(cachedAnswerId) !== undefined) {
+        textareaStudentAnswer.text($xblocksContainer.data(cachedAnswerId));
+        problemProgress.text($xblocksContainer.data(problemProgressId));
+        usedAttemptsFeedback.text($xblocksContainer.data(usedAttemptsFeedbackId));
     }
 
     // POLYFILL notify if it does not exist. Like in the xblock workbench.
@@ -58,9 +59,9 @@ function FreeTextResponseView(runtime, element) {
                 buttonSave.addClass(response.nodisplay_class);
                 setClassForTextAreaParent(response.indicator_class); 
 
-                $('body').data(cachedAnswerId, $element.find('.student_answer').val());
-                $('body').data(problemProgressId, response.problem_progress);
-                $('body').data(usedAttemptsFeedbackId, response.used_attempts_feedback);
+                $xblocksContainer.data(cachedAnswerId, $element.find('.student_answer').val());
+                $xblocksContainer.data(problemProgressId, response.problem_progress);
+                $xblocksContainer.data(usedAttemptsFeedbackId, response.used_attempts_feedback);
  
                 runtime.notify('submit', {
                     state: 'end'
@@ -93,9 +94,9 @@ function FreeTextResponseView(runtime, element) {
                 buttonSave.text(buttonSave[0].dataset.value);
                 userAlertMessage.text(response.user_alert);
 
-                $('body').data(cachedAnswerId, $element.find('.student_answer').val());
-                $('body').data(problemProgressId, response.problem_progress);
-                $('body').data(usedAttemptsFeedbackId, response.used_attempts_feedback);
+                $xblocksContainer.data(cachedAnswerId, $element.find('.student_answer').val());
+                $xblocksContainer.data(problemProgressId, response.problem_progress);
+                $xblocksContainer.data(usedAttemptsFeedbackId, response.used_attempts_feedback);
 
                 runtime.notify('save', {
                     state: 'end'
