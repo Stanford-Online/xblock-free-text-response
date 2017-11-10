@@ -18,10 +18,11 @@ from xblock.fields import String
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
+from .mixins import EnforceDueDates
 
 
 @XBlock.needs("i18n")
-class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
+class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
     """
     Enables instructors to create questions with free-text responses.
@@ -264,6 +265,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 'problem_progress': self._get_problem_progress(),
                 'prompt': self.prompt,
                 'student_answer': self.student_answer,
+                'is_past_due': self.is_past_due(),
                 'used_attempts_feedback': self._get_used_attempts_feedback(),
                 'visibility_class': self._get_indicator_visibility_class(),
                 'word_count_message': self._get_word_count_message(),
@@ -539,6 +541,15 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             result = self._get_invalid_word_count_message(ignore_attempts)
         return result
 
+    def _can_submit(self):
+        if self.is_past_due():
+            return False
+        if self.max_attempts == 0:
+            return True
+        if self.count_attempts < self.max_attempts:
+            return True
+        return False
+
     @XBlock.json_handler
     def submit(self, data, suffix=''):
         # pylint: disable=unused-argument
@@ -547,7 +558,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         # Fails if the UI submit/save buttons were shut
         # down on the previous sumbisson
-        if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
+        if self._can_submit():
             self.student_answer = data['student_answer']
             # Counting the attempts and publishing a score
             # even if word count is invalid.
