@@ -2,10 +2,6 @@
 Mixins for the Free Text Response XBlock
 """
 import datetime
-import pytz
-from django.conf import settings
-
-TIME_ZONE = pytz.timezone(getattr(settings, 'TIME_ZONE', pytz.utc.zone))
 
 
 class EnforceDueDates(object):  # pylint: disable=too-few-public-methods
@@ -15,19 +11,23 @@ class EnforceDueDates(object):  # pylint: disable=too-few-public-methods
     subsection in which they are placed
     """
 
-    # These values are pulled from platform.
-    # They are defaulted to None for tests.
-    due = None
-    graceperiod = None
-
     def is_past_due(self):
         """
         Determine if component is past-due
         """
-        now = datetime.datetime.utcnow().replace(tzinfo=TIME_ZONE)
-        if self.due is not None:
-            due_date = self.due
-            if self.graceperiod is not None:
-                due_date = due_date + self.graceperiod
-            return now > due_date
+        # These values are pulled from platform.
+        # They are defaulted to None for tests.
+        due = getattr(self, 'due', None)
+        graceperiod = getattr(self, 'graceperiod', None)
+        # Calculate the current DateTime so we can compare the due date to it.
+        # datetime.utcnow() returns timezone naive date object.
+        now = datetime.datetime.utcnow()
+        if due is not None:
+            # Remove timezone information from platform provided due date.
+            # Dates are stored as UTC timezone aware objects on platform.
+            due = due.replace(tzinfo=None)
+            if graceperiod is not None:
+                # Compare the datetime objects (both have to be timezone naive)
+                due = due + graceperiod
+            return now > due
         return False
