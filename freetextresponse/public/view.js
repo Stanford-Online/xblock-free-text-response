@@ -4,6 +4,7 @@ function FreeTextResponseView(runtime, element) {
     var $ = window.jQuery;
     var $element = $(element);
     var $xblocksContainer = $('#seq_content');
+    var buttonHide = $element.find('.hide-button');
     var buttonSubmit = $element.find('.check.Submit');
     var buttonSave = $element.find('.save');
     var usedAttemptsFeedback = $element.find('.action .used-attempts-feedback');
@@ -12,7 +13,7 @@ function FreeTextResponseView(runtime, element) {
     var userAlertMessage = $element.find('.user_alert');
     var textareaStudentAnswer = $element.find('.student_answer');
     var textareaParent = textareaStudentAnswer.parent();
-
+    var responseList = $element.find('.response-list');
     var url = runtime.handlerUrl(element, 'submit');
     var urlSave = runtime.handlerUrl(element, 'save_reponse');
 
@@ -38,6 +39,10 @@ function FreeTextResponseView(runtime, element) {
         textareaParent.addClass(new_class); 
     }
 
+    buttonHide.on('click', function () {
+        responseList.toggle();
+    });
+
     buttonSubmit.on('click', function () {
         buttonSubmit.text(buttonSubmit[0].dataset.checking);
         runtime.notify('submit', {
@@ -47,7 +52,8 @@ function FreeTextResponseView(runtime, element) {
         $.ajax(url, {
             type: 'POST',
             data: JSON.stringify({
-                'student_answer': $element.find('.student_answer').val()
+                'student_answer': $element.find('.student_answer').val(),
+                'can_record_response': $element.find('.messageCheckbox').prop('checked')
             }),
             success: function buttonSubmitOnSuccess(response) {
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
@@ -57,12 +63,19 @@ function FreeTextResponseView(runtime, element) {
                 buttonSubmit.text(buttonSubmit[0].dataset.value);
                 userAlertMessage.text(response.user_alert);
                 buttonSave.addClass(response.nodisplay_class);
-                setClassForTextAreaParent(response.indicator_class); 
+                setClassForTextAreaParent(response.indicator_class);
+                if (!response.user_alert && response.display_other_responses) {
+                    var responseHTML = get_student_responses_html(response.other_responses);
+                    if (responseHTML) {
+                        responseList.html(responseHTML);
+                    }
+                    $element.find('.responses-box').show();
+                }
 
                 $xblocksContainer.data(cachedAnswerId, $element.find('.student_answer').val());
                 $xblocksContainer.data(problemProgressId, response.problem_progress);
                 $xblocksContainer.data(usedAttemptsFeedbackId, response.used_attempts_feedback);
- 
+
                 runtime.notify('submit', {
                     state: 'end'
                 });
@@ -73,6 +86,17 @@ function FreeTextResponseView(runtime, element) {
         });
         return false;
     });
+
+    function get_student_responses_html(responses) {
+        /*
+        Convert list of responses to a html string to add to the page
+        */
+        var html = '';
+        responses.forEach(function(item) {
+            html += '<li class="other-student-responses">' + item.answer + '</li>';
+        });
+        return html;
+    }
 
     buttonSave.on('click', function () {
         buttonSave.text(buttonSave[0].dataset.checking);

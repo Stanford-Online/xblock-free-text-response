@@ -10,6 +10,12 @@
             <span class="status {{ visibility_class }}" aria-describedby="student_answer"></span>
         </div>
     </div>
+    {% if display_other_responses %}
+        <input class="messageCheckbox" type="checkbox" checked>
+            <span>Allow my response to possibly be visible by other learners after
+            submitting their response</span>
+        <br>
+    {% endif %}
     <div class="capa_alert submission-received">{{ submitted_message }}</div>
     <div class="action">
         {% if not is_past_due %}
@@ -23,4 +29,13 @@
         <div class="used-attempts-feedback" aria-live="polite">{{ used_attempts_feedback }}</div>
     </div>
     <div class="capa_alert user_alert">{{ user_alert }}</div>
+    {% if display_other_responses %}
+        <div class="responses-box">
+            <button class="hide-button">Hide</button>
+            <p class="responses-title">Submissions by others</p>
+            <ul class="response-list">
+                <li class="no-response">No responses to show at this time</li>
+            </ul>
+        </div>
+    {% endif %}
 </div>
