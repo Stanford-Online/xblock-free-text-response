@@ -68,13 +68,7 @@ function FreeTextResponseView(runtime, element) {
                 userAlertMessage.text(response.user_alert);
                 buttonSave.addClass(response.nodisplay_class);
                 setClassForTextAreaParent(response.indicator_class);
-                if (!response.user_alert && response.display_other_responses) {
-                    var responseHTML = get_student_responses_html(response.other_responses);
-                    if (responseHTML) {
-                        responseList.html(responseHTML);
-                    }
-                    $element.find('.responses-box').show();
-                }
+                displayResponsesIfAnswered(response);
 
                 $xblocksContainer.data(cachedAnswerId, $element.find('.student_answer').val());
                 $xblocksContainer.data(problemProgressId, response.problem_progress);
@@ -91,15 +85,27 @@ function FreeTextResponseView(runtime, element) {
         return false;
     });
 
-    function get_student_responses_html(responses) {
+    function getStudentResponsesHtml(responses) {
         /*
         Convert list of responses to a html string to add to the page
         */
         var html = '';
+        var noResponsesText = responseList.data('noresponse');
         responses.forEach(function(item) {
             html += '<li class="other-student-responses">' + item.answer + '</li>';
         });
+        html = html || '<li class="no-response">' + noResponsesText + '</li>';
         return html;
+    }
+
+    function displayResponsesIfAnswered(response) {
+        if (!response.display_other_responses) {
+            $element.find('.responses-box').addClass('hidden');
+            return;
+        }
+        var responseHTML = getStudentResponsesHtml(response.other_responses);
+        responseList.html(responseHTML);
+        $element.find('.responses-box').removeClass('hidden');
     }
 
     buttonSave.on('click', function () {
