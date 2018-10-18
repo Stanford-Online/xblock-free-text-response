@@ -5,6 +5,8 @@ function FreeTextResponseView(runtime, element) {
     var $element = $(element);
     var $xblocksContainer = $('#seq_content');
     var buttonHide = $element.find('.hide-button');
+    var buttonHideTextHide = $('.hide', buttonHide);
+    var buttonHideTextShow = $('.show', buttonHide);
     var buttonSubmit = $element.find('.check.Submit');
     var buttonSave = $element.find('.save');
     var usedAttemptsFeedback = $element.find('.action .used-attempts-feedback');
@@ -41,6 +43,8 @@ function FreeTextResponseView(runtime, element) {
 
     buttonHide.on('click', function () {
         responseList.toggle();
+        buttonHideTextHide.toggle();
+        buttonHideTextShow.toggle();
     });
 
     buttonSubmit.on('click', function () {

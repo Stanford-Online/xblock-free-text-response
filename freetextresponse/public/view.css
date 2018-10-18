@@ -126,6 +126,12 @@
   text-decoration: underline;
   text-shadow: none;
 }
+.freetextresponse .hide-button .show {
+  display: none;
+}
+.freetextresponse .hide-button .hide {
+  display: inline;
+}
 
 .freetextresponse .response-list {
   list-style: none;
