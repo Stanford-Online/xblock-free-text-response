@@ -4,7 +4,6 @@ This is the core logic for the Free-text Response XBlock
 from enum import Enum
 from django.db import IntegrityError
 from django.template.context import Context
-from django.template.loader import get_template
 from django.utils.translation import ungettext
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
@@ -17,6 +16,7 @@ from xblock.fields import Scope
 from xblock.fields import String
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
+from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from .mixins import EnforceDueDates, MissingDataFetcherMixin
 
@@ -35,6 +35,9 @@ class FreeTextResponse(
     """
     Enables instructors to create questions with free-text responses.
     """
+
+    loader = ResourceLoader(__name__)
+
     @staticmethod
     def workbench_scenarios():
         """
@@ -240,8 +243,7 @@ class FreeTextResponse(
 
     def build_fragment(
             self,
-            template,
-            context_dict,
+            rendered_template,
             initialize_js_func,
             additional_css=[],
             additional_js=[],
@@ -250,8 +252,7 @@ class FreeTextResponse(
         """
         Creates a fragment for display.
         """
-        context = Context(context_dict)
-        fragment = Fragment(template.render(context))
+        fragment = Fragment(rendered_template)
         for item in additional_css:
             url = self.runtime.local_resource_url(self, item)
             fragment.add_css_url(url)
@@ -278,9 +279,7 @@ class FreeTextResponse(
             (Fragment): The HTML Fragment for this XBlock, which determines the
             general frame of the FreeTextResponse Question.
         """
-
         display_other_responses = self.display_other_student_responses
-
         self.runtime.service(self, 'i18n')
         context.update(
             {
@@ -298,10 +297,13 @@ class FreeTextResponse(
                 'other_responses': self.get_other_answers(),
             }
         )
-        template = get_template('freetextresponse_view.html')
+        template = self.loader.render_django_template(
+            'templates/freetextresponse_view.html',
+            context=Context(context),
+            i18n_service=self.runtime.service(self, 'i18n'),
+        )
         fragment = self.build_fragment(
             template,
-            context,
             initialize_js_func='FreeTextResponseView',
             additional_css=[
                 'public/view.css',

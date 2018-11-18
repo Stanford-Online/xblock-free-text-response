@@ -11,9 +11,10 @@ from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
 from xblock.field_data import DictFieldData
 from xblock.validation import ValidationMessage
+from xblockutils.resources import ResourceLoader
 
 from django.db import IntegrityError
-from django.template.loader import get_template
+from django.template.context import Context
 
 from .freetextresponse import Credit
 from .freetextresponse import FreeTextResponse
@@ -56,7 +57,13 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         Helper method that creates a Free-text Response XBlock
         """
         course_id = SlashSeparatedCourseKey('foo', 'bar', 'baz')
-        runtime = Mock(course_id=course_id)
+        runtime = Mock(
+            course_id=course_id,
+            service=Mock(
+                # Is there a cleaner mock to the `i18n` service?
+                return_value=Mock(_catalog={}),
+            ),
+        )
         scope_ids = Mock()
         field_data = DictFieldData(kw)
         xblock = FreeTextResponse(runtime, field_data, scope_ids)
@@ -182,10 +189,13 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         context = {
             'prompt': studio_settings_prompt,
         }
-        template = get_template('freetextresponse_view.html')
+        loader = ResourceLoader('freetextresponse')
+        template = loader.render_django_template(
+            'templates/freetextresponse_view.html',
+            context=Context(context),
+        )
         fragment = self.xblock.build_fragment(
             template,
-            context,
             initialize_js_func='FreeTextResponseView',
             additional_css=[],
             additional_js=[],
