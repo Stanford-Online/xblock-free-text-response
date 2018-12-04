@@ -12,8 +12,7 @@
     </div>
     {% if display_other_responses %}
         <input class="messageCheckbox" type="checkbox" checked>
-            <span>Allow my response to possibly be visible by other learners after
-            submitting their response</span>
+            <span>{% trans "Allow my response to possibly be visible by other learners after submitting their response" %}</span>
         <br>
     {% endif %}
     <div class="capa_alert submission-received">{{ submitted_message }}</div>
@@ -30,15 +29,19 @@
     </div>
     <div class="capa_alert user_alert">{{ user_alert }}</div>
     {% if display_other_responses %}
-        <div class="responses-box">
+        <div class="responses-box {% if not student_answer %}hidden{% endif %}">
             <button class="hide-button">
-                <span class="hide">Hide</span>
-                <span class="show">Show</span>
-                <span class="sr">peer responses</span>
+                <span class="hide">{% trans "Hide" %}</span>
+                <span class="show">{% trans "Show" %}</span>
+                <span class="sr">{% trans "peer responses" %}</span>
             </button>
-            <p class="responses-title">Submissions by others</p>
-            <ul class="response-list">
-                <li class="no-response">No responses to show at this time</li>
+            <p class="responses-title">{% trans "Submissions by others" %}</p>
+            <ul class="response-list" data-noresponse={% trans "No responses to show at this time" %}>
+                {% for response in other_responses %}
+                    <li class="other-student-responses">{{ response.answer }}</li>
+                {% empty %}
+                    <li class="no-response">{% trans "No responses to show at this time" %}</li>
+                {% endfor %}
             </ul>
         </div>
     {% endif %}

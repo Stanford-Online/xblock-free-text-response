@@ -2,7 +2,6 @@
 This is the core logic for the Free-text Response XBlock
 """
 from enum import Enum
-import pkg_resources
 from django.db import IntegrityError
 from django.template.context import Context
 from django.template.loader import get_template
@@ -27,10 +26,10 @@ MAX_RESPONSES = 3
 
 @XBlock.needs("i18n")
 class FreeTextResponse(
-    EnforceDueDates,
-    MissingDataFetcherMixin,
-    StudioEditableXBlockMixin,
-    XBlock,
+        EnforceDueDates,
+        MissingDataFetcherMixin,
+        StudioEditableXBlockMixin,
+        XBlock,
 ):
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
     """
@@ -280,6 +279,8 @@ class FreeTextResponse(
             general frame of the FreeTextResponse Question.
         """
 
+        display_other_responses = self.display_other_student_responses
+
         self.runtime.service(self, 'i18n')
         context.update(
             {
@@ -293,8 +294,8 @@ class FreeTextResponse(
                 'used_attempts_feedback': self._get_used_attempts_feedback(),
                 'visibility_class': self._get_indicator_visibility_class(),
                 'word_count_message': self._get_word_count_message(),
-                'display_other_responses': self.display_other_student_responses,
-                'other_responses': [],
+                'display_other_responses': display_other_responses,
+                'other_responses': self.get_other_answers(),
             }
         )
         template = get_template('freetextresponse_view.html')
@@ -590,7 +591,8 @@ class FreeTextResponse(
             # even if word count is invalid.
             self.count_attempts += 1
             self._compute_score()
-            if self.display_other_student_responses and data.get('can_record_response'):
+            display_other_responses = self.display_other_student_responses
+            if display_other_responses and data.get('can_record_response'):
                 self.store_student_response()
         result = {
             'status': 'success',
@@ -602,7 +604,7 @@ class FreeTextResponse(
             'user_alert': self._get_user_alert(
                 ignore_attempts=True,
             ),
-            'other_responses': self.get_other_answers(self.get_student_id()),
+            'other_responses': self.get_other_answers(),
             'display_other_responses': self.display_other_student_responses,
             'visibility_class': self._get_indicator_visibility_class(),
         }
@@ -652,14 +654,21 @@ class FreeTextResponse(
 
         # Want to store extra response so student can still see
         # MAX_RESPONSES answers if their answer is in the pool.
-        self.displayable_answers = self.displayable_answers[-(MAX_RESPONSES+1):]
+        response_index = -(MAX_RESPONSES+1)
+        self.displayable_answers = self.displayable_answers[response_index:]
 
-    def get_other_answers(self, student_id):
+    def get_other_answers(self):
         """
         Returns at most MAX_RESPONSES answers from the pool.
 
         Does not return answers the student had submitted.
         """
+        student_id = self.get_student_id()
+        display_other_responses = self.display_other_student_responses
+        shouldnt_show_other_responses = not display_other_responses
+        student_answer_incorrect = self._determine_credit() == Credit.zero
+        if student_answer_incorrect or shouldnt_show_other_responses:
+            return []
         return_list = [
             response
             for response in self.displayable_answers

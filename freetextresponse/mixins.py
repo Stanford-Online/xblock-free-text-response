@@ -1,10 +1,11 @@
 """
 Mixins for the Free Text Response XBlock
 """
+# pylint: disable=too-few-public-methods
 import datetime
 
 
-class EnforceDueDates(object):  # pylint: disable=too-few-public-methods
+class EnforceDueDates(object):
     """
     xBlock Mixin to allow xblocks to check the due date
     (taking the graceperiod into account) of the
