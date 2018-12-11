@@ -36,7 +36,7 @@
                 <span class="sr">{% trans "peer responses" %}</span>
             </button>
             <p class="responses-title">{% trans "Submissions by others" %}</p>
-            <ul class="response-list" data-noresponse={% trans "No responses to show at this time" %}>
+            <ul class="response-list" data-noresponse="{% trans "No responses to show at this time" %}">
                 {% for response in other_responses %}
                     <li class="other-student-responses">{{ response.answer }}</li>
                 {% empty %}
