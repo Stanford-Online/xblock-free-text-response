@@ -2,7 +2,7 @@
   "name": "xblock-free-text-response",
   "title": "FreeTextResponse XBlock",
   "description": "Enables instructors to create questions with free-text responses.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/Stanford-Online/xblock-free-text-response",
   "author": {
     "name": "Azim Pradhan",
