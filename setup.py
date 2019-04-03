@@ -34,14 +34,16 @@ setup(
         'freetextresponse',
     ],
     install_requires=[
-        'django',
-        'django_nose',
-        'mock',
         'coverage',
+        'ddt',
+        'django<2.0',
+        'django_nose',
+        'edx-opaque-keys',
+        'enum34',
+        'mock',
         'mako',
         'XBlock',
         'xblock-utils',
-        'enum34',
     ],
     entry_points={
         'xblock.v1': [

@@ -1,6 +1,0 @@
-ddt
-django<1.9,>=1.8
-git+https://github.com/edx/XBlock.git#egg=XBlock
-git+https://github.com/edx/xblock-utils.git@v1.1.1#egg=xblock-utils==v1.1.1
-git+https://github.com/edx/opaque-keys.git@27dc382ea587483b1e3889a3d19cbd90b9023a06#egg=opaque-keys
--e .
