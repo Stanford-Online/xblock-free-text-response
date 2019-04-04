@@ -34,17 +34,16 @@ setup(
         'freetextresponse',
     ],
     install_requires=[
-        'django',
-        'django_nose',
-        'mock',
         'coverage',
+        'ddt',
+        'django<2.0',
+        'django_nose',
+        'edx-opaque-keys',
+        'enum34',
+        'mock',
         'mako',
         'XBlock',
         'xblock-utils',
-        'enum34',
-    ],
-    dependency_links=[
-        'https://github.com/edx/xblock-utils/tarball/c39bf653e4f27fb3798662ef64cde99f57603f79#egg=xblock-utils',
     ],
     entry_points={
         'xblock.v1': [
