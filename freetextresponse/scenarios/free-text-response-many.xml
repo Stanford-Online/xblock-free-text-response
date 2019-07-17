@@ -1,0 +1,40 @@
+<sequence_demo>
+    <vertical_demo>
+        <freetextresponse />
+        <freetextresponse name='My First XBlock' />
+        <freetextresponse
+            display_name="Full Credit is asdf, half is fdsa"
+            fullcredit_keyphrases="['asdf']"
+            halfcredit_keyphrases="['fdsa']"
+            min_word_count="2"
+            max_word_count="2"
+            max_attempts="5"
+        />
+        <freetextresponse
+            display_name="Min words 2"
+            min_word_count="2"
+        />
+        <freetextresponse
+            display_name="Max Attempts 5 XBlock"
+            max_attempts="5"
+        />
+        <freetextresponse
+            display_name="Full credit is asdf, Max Attempts 3"
+            max_attempts="3"
+            min_word_count="2"
+            fullcredit_keyphrases="['asdf']"
+        />
+        <freetextresponse
+            display_name="New submitted message"
+            submitted_message="Different message"
+        />
+        <freetextresponse
+            display_name="Blank submitted message"
+            submitted_message=""
+        />
+        <freetextresponse
+            display_name="Display correctness if off"
+            display_correctness="False"
+        />
+    </vertical_demo>
+</sequence_demo>

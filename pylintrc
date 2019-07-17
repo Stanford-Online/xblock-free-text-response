@@ -1,8 +1,30 @@
-[VARIABLES]
-dummy-variables-rgx=_|dummy
+[MESSAGES CONTROL]
+disable = 
+	locally-disabled,
+	locally-enabled,
+	no-init,
+	no-self-use,
+	too-few-public-methods,
+	too-many-ancestors,
+	too-many-arguments,
+	too-many-instance-attributes,
+	too-many-public-methods,
+	useless-object-inheritance,
 
 [REPORTS]
-reports=no
+output-format = text
 
-[MESSAGES CONTROL]
-disable=locally-disabled
+[BASIC]
+good-names = f,i,j,k,db,ex,Run,_,__,js
+no-docstring-rgx = __.*__$|test_.+|setUp$|setUpClass$|tearDown$|tearDownClass$|Meta$
+
+[FORMAT]
+ignore-long-lines = ^.*https?://.*$
+
+[VARIABLES]
+dummy-variables-rgx = _|dummy|unused|.*_unused
+
+[CLASSES]
+defining-attr-methods = __init__,__new__,setUp
+valid-classmethod-first-arg = cls
+valid-metaclass-classmethod-first-arg = mcs

@@ -8,12 +8,10 @@ DATABASES = {
         # 'NAME': 'intentionally-omitted',
     },
 }
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 INSTALLED_APPS = (
-    'django_nose',
     'freetextresponse',
 )
-
-SECRET_KEY = 'freetextresponse_SECRET_KEY'
+LOCALE_PATHS = [
+    'freetextresponse/translations',
+]
+SECRET_KEY = 'SECRET_KEY'
