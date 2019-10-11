@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
 
-[stanford-openedx-xblocks.free-text-response]
+[xblocks.xblock-free-text-response]
 file_filter = freetextresponse/translations/<lang>/LC_MESSAGES/text.po
 source_file = freetextresponse/translations/en/LC_MESSAGES/text.po
 source_lang = en
