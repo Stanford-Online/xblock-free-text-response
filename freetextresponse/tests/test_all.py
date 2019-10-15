@@ -14,7 +14,6 @@ from xblock.validation import ValidationMessage
 from xblockutils.resources import ResourceLoader
 
 from django.db import IntegrityError
-from django.template.context import Context
 
 from .freetextresponse import Credit
 from .freetextresponse import FreeTextResponse
@@ -96,7 +95,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
             ValidationMessage.ERROR,
             _(msg)
         )
-        test_result = FreeTextResponse._generate_validation_message(msg)
+        test_result = self.xblock._generate_validation_message(msg)
         self.assertEqual(
             type(result),
             type(test_result),
@@ -192,7 +191,7 @@ class FreetextResponseXblockTestCase(unittest.TestCase):
         loader = ResourceLoader('freetextresponse')
         template = loader.render_django_template(
             'templates/freetextresponse_view.html',
-            context=Context(context),
+            context=context,
         )
         fragment = self.xblock.build_fragment(
             template,

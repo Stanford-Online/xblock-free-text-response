@@ -1,0 +1,219 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+# Translators:
+# Omar Al-Ithawi <i@omardo.com>, 2019
+# Vu Bach, 2019
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-09-26 07:24+0000\n"
+"PO-Revision-Date: 2019-07-04 00:16+0000\n"
+"Last-Translator: Vu Bach, 2019\n"
+"Language-Team: Vietnamese (https://www.transifex.com/open-edx/teams/6205/"
+"vi/)\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: freetextresponse/models.py:41
+msgid "Display Correctness?"
+msgstr "Hiển Thị Chỉnh Sửa?  "
+
+#: freetextresponse/models.py:43
+msgid ""
+"This is a flag that indicates if the indicator icon should be displayed "
+"after a student enters their response"
+msgstr ""
+"Đây là một lá cờ cho biết nếu biểu tượng hiển thị nên xuất hiện sau khi một "
+"học viên nhập trả lời của họ."
+
+#: freetextresponse/models.py:51
+msgid "Display Other Student Responses"
+msgstr "Hiển Thị Trả Lời Khác của Học Viên "
+
+#: freetextresponse/models.py:53
+msgid ""
+"This will display other student responses to the student after they submit "
+"their response."
+msgstr ""
+"Sẽ hiển thị những câu trả lời khác của học viên tới học viên sau khi họ đã "
+"gửi phản hổi. "
+
+#: freetextresponse/models.py:62
+msgid "System selected answers to give to students"
+msgstr "Hệ thống đã chọn đáp án để đưa cho học viên"
+
+#: freetextresponse/models.py:65
+msgid "Display Name"
+msgstr "Tên hiển thị"
+
+#: freetextresponse/models.py:67
+msgid "This is the title for this question type"
+msgstr "Đây là tiêu đề cho dạng câu hỏi này"
+
+#: freetextresponse/models.py:73
+msgid "Full-Credit Key Phrases"
+msgstr "Từ Khóa Toàn Bộ Điểm "
+
+#: freetextresponse/models.py:75
+msgid ""
+"This is a list of words or phrases, one of which must be present in order "
+"for the student's answer to receive full credit"
+msgstr ""
+"Đây là danh sách những từ hoặc cụm từ, nếu xuất hiện trong đáp án của học "
+"viên thì họ sẽ được nhận điểm tối đa. "
+
+#: freetextresponse/models.py:83
+msgid "Half-Credit Key Phrases"
+msgstr "Từ Khóa Nửa Điểm "
+
+#: freetextresponse/models.py:85
+msgid ""
+"This is a list of words or phrases, one of which must be present in order "
+"for the student's answer to receive half credit"
+msgstr ""
+"Đây là danh sách những từ hoặc cụm từ, nếu xuất hiện trong đáp án của học "
+"viên thì họ sẽ chỉ được nhận nửa số điểm tối đa.  "
+
+#: freetextresponse/models.py:93
+msgid "Maximum Number of Attempts"
+msgstr "Số Lần Thử Tối Đa  "
+
+#: freetextresponse/models.py:95
+msgid ""
+"This is the maximum number of times a student is allowed to attempt the "
+"problem"
+msgstr "Đây là số lần tối đa mà học viên được phép thử đối với câu hỏi."
+
+#: freetextresponse/models.py:103
+msgid "Maximum Word Count"
+msgstr "Số Từ Tối Đa "
+
+#: freetextresponse/models.py:105
+msgid "This is the maximum number of words allowed for this question"
+msgstr "Đây là số lượng từ tối đa dùng cho câu hỏi này. "
+
+#: freetextresponse/models.py:113
+msgid "Minimum Word Count"
+msgstr "Số Từ Tối Thiểu "
+
+#: freetextresponse/models.py:115
+msgid "This is the minimum number of words required for this question"
+msgstr "Đây là số lượng từ tối thiểu dùng cho câu hỏi này. "
+
+#: freetextresponse/models.py:123
+msgid "Prompt"
+msgstr "Gợi ý"
+
+#: freetextresponse/models.py:125
+msgid "This is the prompt students will see when asked to enter their response"
+msgstr ""
+"Đây là lời nhắc mà học viên sẽ thấy khi họ được hỏi để nhập câu trả lời "
+
+#: freetextresponse/models.py:133
+msgid "Submission Received Message"
+msgstr "Tin Nhắn Sau Khi Đã Nộp Bài "
+
+#: freetextresponse/models.py:135
+msgid "This is the message students will see upon submitting their response"
+msgstr "Đây là tin nhắn học viên sẽ thấy sau khi nộp câu trả lời của họ "
+
+#: freetextresponse/models.py:142
+msgid "Weight"
+msgstr "Weight"
+
+#: freetextresponse/models.py:144
+msgid "This assigns an integer value representing the weight of this problem"
+msgstr "Đặt một giá trị số hiển thị tỷ trọng của câu hỏi "
+
+#: freetextresponse/models.py:152
+msgid "Draft Received Message"
+msgstr "Tin Nhắn Sau Khi Đã Nộp Nháp "
+
+#: freetextresponse/models.py:154
+msgid "This is the message students will see upon submitting a draft response"
+msgstr "Đây là tin nhắn học viên sẽ thấy sau khi nộp bản nháp phản h của họ"
+
+#: freetextresponse/templates/view.html:15
+msgid ""
+"Allow my response to possibly be visible by other learners after submitting "
+"their response"
+msgstr ""
+"Cho phép phản hổi của mình được nhìn thấy bởi học viên khác sau khi họ đã "
+"nộp bài "
+
+#: freetextresponse/templates/view.html:21
+#: freetextresponse/templates/view.html:24
+msgid "Checking..."
+msgstr "Đang kiểm tra..."
+
+#: freetextresponse/templates/view.html:21
+#: freetextresponse/templates/view.html:22
+msgid "Submit"
+msgstr "Nộp Bài "
+
+#: freetextresponse/templates/view.html:24
+#: freetextresponse/templates/view.html:25
+msgid "Save"
+msgstr "Lưu"
+
+#: freetextresponse/templates/view.html:34
+msgid "Hide"
+msgstr "Ẩn"
+
+#: freetextresponse/templates/view.html:35
+msgid "Show"
+msgstr "Hiện "
+
+#: freetextresponse/templates/view.html:36
+msgid "peer responses"
+msgstr "trả lời của bạn khác "
+
+#: freetextresponse/templates/view.html:38
+msgid "Submissions by others"
+msgstr "Bài nộp của Học viên khác "
+
+#: freetextresponse/templates/view.html:39
+#: freetextresponse/templates/view.html:43
+msgid "No responses to show at this time"
+msgstr "Hiện tại không có phản hồi nào để hiển thị "
+
+#: freetextresponse/views.py:126
+#, python-brace-format
+msgid "{weight} point possible"
+msgid_plural "{weight} points possible"
+msgstr[0] "{weight} điểm tối đa "
+
+#: freetextresponse/views.py:139
+#, python-brace-format
+msgid "{score_string}/{weight} point"
+msgid_plural "{score_string}/{weight} points"
+msgstr[0] "{score_string}/{weight} điểm "
+
+#: freetextresponse/views.py:157
+#, python-brace-format
+msgid "You have used {count_attempts} of {max_attempts} submission"
+msgid_plural "You have used {count_attempts} of {max_attempts} submissions"
+msgstr[0] "Bạn đã thử {count_attempts} của {max_attempts} lần\""
+
+#: freetextresponse/views.py:181
+#, python-brace-format
+msgid "Your response must be between {min} and {max} word."
+msgid_plural "Your response must be between {min} and {max} words."
+msgstr[0] "Giới hạn {min}-{max} từ."
+
+#: freetextresponse/views.py:277
+#, python-brace-format
+msgid "Invalid Word Count. {word_count_message}"
+msgstr "Số từ không hợp lệ. {word_count_message}"
+
+#~ msgid "Please enter your response within this text area"
+#~ msgstr "Hãy nhập câu trả lời của bạn tạị khung chữ này "

@@ -1,4 +1,12 @@
+/* eslint-disable no-unused-vars */
+/**
+ * Initialize the FreeTextResponse student view
+ * @param {Object} runtime - The XBlock JS Runtime
+ * @param {Object} element - The containing DOM element for this instance of the XBlock
+ * @returns {undefined} nothing
+ */
 function FreeTextResponseView(runtime, element) {
+    /* eslint-enable no-unused-vars */
     'use strict';
 
     var $ = window.jQuery;
@@ -18,12 +26,12 @@ function FreeTextResponseView(runtime, element) {
     var responseList = $element.find('.response-list');
     var url = runtime.handlerUrl(element, 'submit');
     var urlSave = runtime.handlerUrl(element, 'save_reponse');
-
     var xblockId = $element.attr('data-usage-id');
     var cachedAnswerId = xblockId + '_cached_answer';
     var problemProgressId = xblockId + '_problem_progress';
     var usedAttemptsFeedbackId = xblockId + '_used_attempts_feedback';
-    if ($xblocksContainer.data(cachedAnswerId) !== undefined) {
+
+    if (typeof $xblocksContainer.data(cachedAnswerId) !== 'undefined') {
         textareaStudentAnswer.text($xblocksContainer.data(cachedAnswerId));
         problemProgress.text($xblocksContainer.data(problemProgressId));
         usedAttemptsFeedback.text($xblocksContainer.data(usedAttemptsFeedbackId));
@@ -31,14 +39,50 @@ function FreeTextResponseView(runtime, element) {
 
     // POLYFILL notify if it does not exist. Like in the xblock workbench.
     runtime.notify = runtime.notify || function () {
+        // eslint-disable-next-line prefer-rest-params, no-console
         console.log('POLYFILL runtime.notify', arguments);
     };
 
-    function setClassForTextAreaParent(new_class) {
+    /**
+     * Update CSS classes
+     * @param {string} newClass - a CSS class name to be used
+     * @returns {undefined} nothing
+     */
+    function setClassForTextAreaParent(newClass) {
         textareaParent.removeClass('correct');
         textareaParent.removeClass('incorrect');
         textareaParent.removeClass('unanswered');
-        textareaParent.addClass(new_class); 
+        textareaParent.addClass(newClass);
+    }
+
+    /**
+     * Convert list of responses to an html string
+     * @param {Array} responses - a list of Responses
+     * @returns {string} a string of HTML to add to the page
+     */
+    function getStudentResponsesHtml(responses) {
+        var html = '';
+        var noResponsesText = responseList.data('noresponse');
+        responses.forEach(function (item) {
+            html += '<li class="other-student-responses">' + item.answer + '</li>';
+        });
+        html = html || '<li class="no-response">' + noResponsesText + '</li>';
+        return html;
+    }
+
+    /**
+     * Display responses, if applicable
+     * @param {Object} response - a jQuery HTTP response
+     * @returns {undefined} nothing
+     */
+    function displayResponsesIfAnswered(response) {
+        if (!response.display_other_responses) {
+            $element.find('.responses-box').addClass('hidden');
+            return;
+        }
+        var responseHTML = getStudentResponsesHtml(response.other_responses);
+        responseList.html(responseHTML);
+        $element.find('.responses-box').removeClass('hidden');
     }
 
     buttonHide.on('click', function () {
@@ -51,13 +95,15 @@ function FreeTextResponseView(runtime, element) {
         buttonSubmit.text(buttonSubmit[0].dataset.checking);
         runtime.notify('submit', {
             message: 'Submitting...',
-            state: 'start'
+            state: 'start',
         });
         $.ajax(url, {
             type: 'POST',
             data: JSON.stringify({
-                'student_answer': $element.find('.student_answer').val(),
-                'can_record_response': $element.find('.messageCheckbox').prop('checked')
+                // eslint-disable-next-line camelcase
+                student_answer: $element.find('.student_answer').val(),
+                // eslint-disable-next-line camelcase
+                can_record_response: $element.find('.messageCheckbox').prop('checked'),
             }),
             success: function buttonSubmitOnSuccess(response) {
                 usedAttemptsFeedback.text(response.used_attempts_feedback);
@@ -75,49 +121,27 @@ function FreeTextResponseView(runtime, element) {
                 $xblocksContainer.data(usedAttemptsFeedbackId, response.used_attempts_feedback);
 
                 runtime.notify('submit', {
-                    state: 'end'
+                    state: 'end',
                 });
             },
             error: function buttonSubmitOnError() {
                 runtime.notify('error', {});
-            }
+            },
         });
         return false;
     });
-
-    function getStudentResponsesHtml(responses) {
-        /*
-        Convert list of responses to a html string to add to the page
-        */
-        var html = '';
-        var noResponsesText = responseList.data('noresponse');
-        responses.forEach(function(item) {
-            html += '<li class="other-student-responses">' + item.answer + '</li>';
-        });
-        html = html || '<li class="no-response">' + noResponsesText + '</li>';
-        return html;
-    }
-
-    function displayResponsesIfAnswered(response) {
-        if (!response.display_other_responses) {
-            $element.find('.responses-box').addClass('hidden');
-            return;
-        }
-        var responseHTML = getStudentResponsesHtml(response.other_responses);
-        responseList.html(responseHTML);
-        $element.find('.responses-box').removeClass('hidden');
-    }
 
     buttonSave.on('click', function () {
         buttonSave.text(buttonSave[0].dataset.checking);
         runtime.notify('save', {
             message: 'Saving...',
-            state: 'start'
+            state: 'start',
         });
         $.ajax(urlSave, {
             type: 'POST',
             data: JSON.stringify({
-                'student_answer': $element.find('.student_answer').val()
+                // eslint-disable-next-line camelcase
+                student_answer: $element.find('.student_answer').val(),
             }),
             success: function buttonSaveOnSuccess(response) {
                 buttonSubmit.addClass(response.nodisplay_class);
@@ -133,17 +157,18 @@ function FreeTextResponseView(runtime, element) {
                 $xblocksContainer.data(usedAttemptsFeedbackId, response.used_attempts_feedback);
 
                 runtime.notify('save', {
-                    state: 'end'
+                    state: 'end',
                 });
             },
             error: function buttonSaveOnError() {
                 runtime.notify('error', {});
-            }
+            },
         });
         return false;
     });
 
-    textareaStudentAnswer.on('keydown', function() {
+    textareaStudentAnswer.on('keydown', function () {
+
         // Reset Messages
         submissionReceivedMessage.text('');
         userAlertMessage.text('');

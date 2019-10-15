@@ -1,8 +1,9 @@
 *.egg-info/
 node_modules/
+*.log
+package-lock.json
 *.pyc
 *.sw[op]
-.coverage
-coverage.xml
 .tox/
-.DS_STORE
+sdk/
+venv/

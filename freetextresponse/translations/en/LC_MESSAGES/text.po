@@ -1,0 +1,204 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-09-26 07:23+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: freetextresponse/models.py:41
+msgid "Display Correctness?"
+msgstr ""
+
+#: freetextresponse/models.py:43
+msgid ""
+"This is a flag that indicates if the indicator icon should be displayed "
+"after a student enters their response"
+msgstr ""
+
+#: freetextresponse/models.py:51
+msgid "Display Other Student Responses"
+msgstr ""
+
+#: freetextresponse/models.py:53
+msgid ""
+"This will display other student responses to the student after they submit "
+"their response."
+msgstr ""
+
+#: freetextresponse/models.py:62
+msgid "System selected answers to give to students"
+msgstr ""
+
+#: freetextresponse/models.py:65
+msgid "Display Name"
+msgstr ""
+
+#: freetextresponse/models.py:67
+msgid "This is the title for this question type"
+msgstr ""
+
+#: freetextresponse/models.py:73
+msgid "Full-Credit Key Phrases"
+msgstr ""
+
+#: freetextresponse/models.py:75
+msgid ""
+"This is a list of words or phrases, one of which must be present in order "
+"for the student's answer to receive full credit"
+msgstr ""
+
+#: freetextresponse/models.py:83
+msgid "Half-Credit Key Phrases"
+msgstr ""
+
+#: freetextresponse/models.py:85
+msgid ""
+"This is a list of words or phrases, one of which must be present in order "
+"for the student's answer to receive half credit"
+msgstr ""
+
+#: freetextresponse/models.py:93
+msgid "Maximum Number of Attempts"
+msgstr ""
+
+#: freetextresponse/models.py:95
+msgid ""
+"This is the maximum number of times a student is allowed to attempt the "
+"problem"
+msgstr ""
+
+#: freetextresponse/models.py:103
+msgid "Maximum Word Count"
+msgstr ""
+
+#: freetextresponse/models.py:105
+msgid "This is the maximum number of words allowed for this question"
+msgstr ""
+
+#: freetextresponse/models.py:113
+msgid "Minimum Word Count"
+msgstr ""
+
+#: freetextresponse/models.py:115
+msgid "This is the minimum number of words required for this question"
+msgstr ""
+
+#: freetextresponse/models.py:123
+msgid "Prompt"
+msgstr ""
+
+#: freetextresponse/models.py:125
+msgid "This is the prompt students will see when asked to enter their response"
+msgstr ""
+
+#: freetextresponse/models.py:133
+msgid "Submission Received Message"
+msgstr ""
+
+#: freetextresponse/models.py:135
+msgid "This is the message students will see upon submitting their response"
+msgstr ""
+
+#: freetextresponse/models.py:142
+msgid "Weight"
+msgstr ""
+
+#: freetextresponse/models.py:144
+msgid "This assigns an integer value representing the weight of this problem"
+msgstr ""
+
+#: freetextresponse/models.py:152
+msgid "Draft Received Message"
+msgstr ""
+
+#: freetextresponse/models.py:154
+msgid "This is the message students will see upon submitting a draft response"
+msgstr ""
+
+#: freetextresponse/templates/view.html:15
+msgid ""
+"Allow my response to possibly be visible by other learners after submitting "
+"their response"
+msgstr ""
+
+#: freetextresponse/templates/view.html:21
+#: freetextresponse/templates/view.html:24
+msgid "Checking..."
+msgstr ""
+
+#: freetextresponse/templates/view.html:21
+#: freetextresponse/templates/view.html:22
+msgid "Submit"
+msgstr ""
+
+#: freetextresponse/templates/view.html:24
+#: freetextresponse/templates/view.html:25
+msgid "Save"
+msgstr ""
+
+#: freetextresponse/templates/view.html:34
+msgid "Hide"
+msgstr ""
+
+#: freetextresponse/templates/view.html:35
+msgid "Show"
+msgstr ""
+
+#: freetextresponse/templates/view.html:36
+msgid "peer responses"
+msgstr ""
+
+#: freetextresponse/templates/view.html:38
+msgid "Submissions by others"
+msgstr ""
+
+#: freetextresponse/templates/view.html:39
+#: freetextresponse/templates/view.html:43
+msgid "No responses to show at this time"
+msgstr ""
+
+#: freetextresponse/views.py:126
+#, python-brace-format
+msgid "{weight} point possible"
+msgid_plural "{weight} points possible"
+msgstr[0] ""
+msgstr[1] ""
+
+#: freetextresponse/views.py:139
+#, python-brace-format
+msgid "{score_string}/{weight} point"
+msgid_plural "{score_string}/{weight} points"
+msgstr[0] ""
+msgstr[1] ""
+
+#: freetextresponse/views.py:157
+#, python-brace-format
+msgid "You have used {count_attempts} of {max_attempts} submission"
+msgid_plural "You have used {count_attempts} of {max_attempts} submissions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: freetextresponse/views.py:181
+#, python-brace-format
+msgid "Your response must be between {min} and {max} word."
+msgid_plural "Your response must be between {min} and {max} words."
+msgstr[0] ""
+msgstr[1] ""
+
+#: freetextresponse/views.py:277
+#, python-brace-format
+msgid "Invalid Word Count. {word_count_message}"
+msgstr ""

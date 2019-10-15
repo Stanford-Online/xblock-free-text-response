@@ -1,0 +1,228 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+# Translators:
+# Omar Al-Ithawi <i@omardo.com>, 2019
+# Pierre Mailhot <pierre.mailhot@gmail.com>, 2019
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-09-26 07:24+0000\n"
+"PO-Revision-Date: 2019-07-04 00:16+0000\n"
+"Last-Translator: Pierre Mailhot <pierre.mailhot@gmail.com>, 2019\n"
+"Language-Team: French (Canada) (https://www.transifex.com/open-edx/"
+"teams/6205/fr_CA/)\n"
+"Language: fr_CA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: freetextresponse/models.py:41
+msgid "Display Correctness?"
+msgstr "Afficher l'exactitude?"
+
+#: freetextresponse/models.py:43
+msgid ""
+"This is a flag that indicates if the indicator icon should be displayed "
+"after a student enters their response"
+msgstr ""
+"C'est un drapeau qui indique si l'icône de l'indicateur doit être affichée "
+"après qu'un élève ait entré sa réponse"
+
+#: freetextresponse/models.py:51
+msgid "Display Other Student Responses"
+msgstr "Afficher les réponses des autres étudiants"
+
+#: freetextresponse/models.py:53
+msgid ""
+"This will display other student responses to the student after they submit "
+"their response."
+msgstr ""
+"Cela affichera les réponses des autres étudiants à l’étudiant après qu’il "
+"aura soumis sa réponse."
+
+#: freetextresponse/models.py:62
+msgid "System selected answers to give to students"
+msgstr "Réponses sélectionnées par le système à donner aux étudiants"
+
+#: freetextresponse/models.py:65
+msgid "Display Name"
+msgstr "Nom d'affichage"
+
+#: freetextresponse/models.py:67
+msgid "This is the title for this question type"
+msgstr "Ceci est le titre pour ce type de question"
+
+#: freetextresponse/models.py:73
+msgid "Full-Credit Key Phrases"
+msgstr "Phrases clés de crédit complet"
+
+#: freetextresponse/models.py:75
+msgid ""
+"This is a list of words or phrases, one of which must be present in order "
+"for the student's answer to receive full credit"
+msgstr ""
+"Ceci est une liste de mots ou d'expressions, dont l'un doit être présent "
+"pour que la réponse de l'élève reçoive un crédit complet."
+
+#: freetextresponse/models.py:83
+msgid "Half-Credit Key Phrases"
+msgstr "Phrases clés de demi crédit"
+
+#: freetextresponse/models.py:85
+msgid ""
+"This is a list of words or phrases, one of which must be present in order "
+"for the student's answer to receive half credit"
+msgstr ""
+"Ceci est une liste de mots ou d'expressions, dont l'un doit être présent "
+"pour que la réponse de l'élève reçoive un demi crédit."
+
+#: freetextresponse/models.py:93
+msgid "Maximum Number of Attempts"
+msgstr "Nombre maximum de tentatives"
+
+#: freetextresponse/models.py:95
+msgid ""
+"This is the maximum number of times a student is allowed to attempt the "
+"problem"
+msgstr ""
+"C'est le nombre maximum de fois qu'un étudiant est autorisé à tenter le "
+"problème"
+
+#: freetextresponse/models.py:103
+msgid "Maximum Word Count"
+msgstr "Nombre de mots maximum"
+
+#: freetextresponse/models.py:105
+msgid "This is the maximum number of words allowed for this question"
+msgstr "C'est le nombre maximum de mots permis pour cette question"
+
+#: freetextresponse/models.py:113
+msgid "Minimum Word Count"
+msgstr "Nombre de mots minimum"
+
+#: freetextresponse/models.py:115
+msgid "This is the minimum number of words required for this question"
+msgstr "C'est le nombre minimum de mots requis pour cette question"
+
+#: freetextresponse/models.py:123
+msgid "Prompt"
+msgstr "Invite"
+
+#: freetextresponse/models.py:125
+msgid "This is the prompt students will see when asked to enter their response"
+msgstr ""
+"Il s’agit de l’invite que les étudiants verront lorsqu’on leur demandera de "
+"répondre."
+
+#: freetextresponse/models.py:133
+msgid "Submission Received Message"
+msgstr "Message de soumission reçue"
+
+#: freetextresponse/models.py:135
+msgid "This is the message students will see upon submitting their response"
+msgstr "C'est le message que les étudiants verront en soumettant leur réponse"
+
+#: freetextresponse/models.py:142
+msgid "Weight"
+msgstr "Poids"
+
+#: freetextresponse/models.py:144
+msgid "This assigns an integer value representing the weight of this problem"
+msgstr "Ceci assigne une valeur entière représentant le poids de ce problème"
+
+#: freetextresponse/models.py:152
+msgid "Draft Received Message"
+msgstr "Message d'ébauche reçue"
+
+#: freetextresponse/models.py:154
+msgid "This is the message students will see upon submitting a draft response"
+msgstr ""
+"C'est le message que les étudiants verront lors de la soumission d'une "
+"ébauche de réponse"
+
+#: freetextresponse/templates/view.html:15
+msgid ""
+"Allow my response to possibly be visible by other learners after submitting "
+"their response"
+msgstr ""
+"Permettre à ma réponse d'être éventuellement visible par d'autres apprenants "
+"après avoir soumis leur réponse"
+
+#: freetextresponse/templates/view.html:21
+#: freetextresponse/templates/view.html:24
+msgid "Checking..."
+msgstr "Vérification en cours..."
+
+#: freetextresponse/templates/view.html:21
+#: freetextresponse/templates/view.html:22
+msgid "Submit"
+msgstr "Soumettre"
+
+#: freetextresponse/templates/view.html:24
+#: freetextresponse/templates/view.html:25
+msgid "Save"
+msgstr "Sauvegarder"
+
+#: freetextresponse/templates/view.html:34
+msgid "Hide"
+msgstr "Cacher"
+
+#: freetextresponse/templates/view.html:35
+msgid "Show"
+msgstr "Montrer"
+
+#: freetextresponse/templates/view.html:36
+msgid "peer responses"
+msgstr "réponses des pairs"
+
+#: freetextresponse/templates/view.html:38
+msgid "Submissions by others"
+msgstr "Soumissions par d'autres"
+
+#: freetextresponse/templates/view.html:39
+#: freetextresponse/templates/view.html:43
+msgid "No responses to show at this time"
+msgstr "Aucune réponse à afficher pour le moment"
+
+#: freetextresponse/views.py:126
+#, python-brace-format
+msgid "{weight} point possible"
+msgid_plural "{weight} points possible"
+msgstr[0] "{weight} point possible"
+msgstr[1] "{weight} points possible"
+
+#: freetextresponse/views.py:139
+#, python-brace-format
+msgid "{score_string}/{weight} point"
+msgid_plural "{score_string}/{weight} points"
+msgstr[0] "{score_string}/{weight} point"
+msgstr[1] "{score_string}/{weight} points"
+
+#: freetextresponse/views.py:157
+#, python-brace-format
+msgid "You have used {count_attempts} of {max_attempts} submission"
+msgid_plural "You have used {count_attempts} of {max_attempts} submissions"
+msgstr[0] "Vous avez utilisé {count_attempts} de {max_attempts} soumission."
+msgstr[1] "Vous avez utilisé {count_attempts} de {max_attempts} soumissions."
+
+#: freetextresponse/views.py:181
+#, python-brace-format
+msgid "Your response must be between {min} and {max} word."
+msgid_plural "Your response must be between {min} and {max} words."
+msgstr[0] "Votre réponse doit comporter entre {min} et {max} mots."
+msgstr[1] "Votre réponse doit comporter entre {min} et {max} mots."
+
+#: freetextresponse/views.py:277
+#, python-brace-format
+msgid "Invalid Word Count. {word_count_message}"
+msgstr "Nombre de mots invalide. {word_count_message}"
+
+#~ msgid "Please enter your response within this text area"
+#~ msgstr "Veuillez entrer votre réponse dans cette zone de texte"

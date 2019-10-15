@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.0.0
+* Pull translations from new tx acct
+* Modernize XBlock infrastructure
+
 ## Version 0.1.0
 * Initial release
 

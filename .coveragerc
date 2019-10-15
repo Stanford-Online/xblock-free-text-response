@@ -1,0 +1,23 @@
+[run]
+data_file = reports/.coverage
+source = freetextresponse
+branch = true
+
+[report]
+ignore_errors = True
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+
+[html]
+title = FreeTextResponse Python Test Coverage Report
+directory = reports/cover
+
+[xml]
+output = reports/coverage.xml
