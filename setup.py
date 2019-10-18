@@ -41,6 +41,7 @@ setup(
     },
     package_data={
         "freetextresponse": [
+            'mixins/*.py',
             'public/*',
             'scenarios/*.xml',
             'templates/*',
